@@ -79,8 +79,8 @@
   .combo input[type=text] { height: 48px; font-size: 16px; padding-left: 38px; padding-right: 40px; border-color: var(--ink); }
   .combo .mag { position: absolute; left: 13px; top: 15px; width: 17px; height: 17px; color: var(--t3); pointer-events: none; }
   .combo .done { position: absolute; right: 6px; top: 6px; height: 36px; padding: 0 14px; border: 0; background: var(--ink); color: #fff; font-size: 13px; cursor: pointer; display: none; }
-  .combo:focus-within .done { display: block; }
-  .combo:focus-within input[type=text] { padding-right: 76px; }
+  .combo.open .done { display: block; }
+  .combo.open input[type=text] { padding-right: 76px; }
   #store-list {
     position: absolute; left: 0; right: 0; top: 47px; z-index: 20; list-style: none;
     max-height: min(70vh, 640px); overflow-y: auto; background: #fff; border: 1px solid var(--ink);

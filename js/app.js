@@ -148,8 +148,9 @@
     const el = list.querySelector('.kb');
     if (el) el.scrollIntoView({ block: 'nearest' });
   }
-  function openList() { renderList(); list.hidden = false; }
-  function closeList() { list.hidden = true; box.value = ''; }
+  const combo = box.closest('.combo');
+  function openList() { renderList(); list.hidden = false; combo.classList.add('open'); }
+  function closeList() { list.hidden = true; box.value = ''; combo.classList.remove('open'); }
 
   function setSelected(next, focus) {
     selected = next;
@@ -203,7 +204,10 @@
       }
       renderList(true);
     });
-    box.addEventListener('blur', () => setTimeout(closeList, 150));
+    // 手机上收起键盘只是输入框失焦，列表和搜索词都要留着；点「完成」或点列表外面才关
+    document.addEventListener('pointerdown', e => {
+      if (!list.hidden && !combo.contains(e.target)) closeList();
+    }, true); // 捕获阶段：赶在勾选重画列表之前判断，否则被点的那行已被替换，会误判成点了外面
     $('#store-done').addEventListener('pointerdown', e => { e.preventDefault(); closeList(); box.blur(); });
 
     $('#chips').addEventListener('click', e => {
