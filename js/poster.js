@@ -93,10 +93,25 @@
     ctx.restore();
   }
 
-  // ---------- logo（原件白色 PNG，含「赫眉」框和 HYMN） ----------
+  // ---------- logo（原件白色 PNG，染成和标题一样的香槟色） ----------
+  let logoTinted = null;
+  function tintedLogo(img) {
+    if (logoTinted) return logoTinted;
+    const c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0);
+    x.globalCompositeOperation = 'source-in';
+    const g = x.createLinearGradient(0, 0, 0, c.height);
+    g.addColorStop(0, CREAM_HI);
+    g.addColorStop(1, CREAM_LO);
+    x.fillStyle = g;
+    x.fillRect(0, 0, c.width, c.height);
+    return (logoTinted = c);
+  }
   function drawLogo(ctx, img) {
     const h = 38, w = h * img.width / img.height;
-    ctx.drawImage(img, (S - w) / 2, 31, w, h);
+    ctx.drawImage(tintedLogo(img), (S - w) / 2, 31, w, h);
   }
 
   // ---------- 二维码 ----------
