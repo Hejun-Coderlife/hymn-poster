@@ -118,7 +118,12 @@
 
   #sheet { position: fixed; inset: 0; background: rgba(22,20,15,.9); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 30; }
   #sheet[hidden] { display: none; }
-  #sheet img { max-width: 100%; max-height: 72vh; -webkit-touch-callout: default; }
+  .sheet-imgs { display: flex; gap: 10px; overflow-x: auto; max-width: 100%; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .sheet-imgs img { flex: none; width: min(78vw, 60vh); max-height: 60vh; object-fit: contain; scroll-snap-align: center; -webkit-touch-callout: default; }
+  .sheet-imgs img:only-child { margin: 0 auto; }
+  .sheet-btns { display: flex; gap: 10px; }
+  #sheet .btn.save { background: #fff; color: var(--ink); border-color: #fff; min-width: 160px; height: 46px; font-size: 15px; }
+  #sheet .btn[hidden] { display: none; }
   #sheet p { color: #fff; text-align: center; margin: 14px 0; font-size: 13px; }
   #sheet .btn { background: transparent; color: #fff; border-color: #fff; }
 
@@ -271,17 +276,20 @@
 </main>
 
 <div id="sheet" hidden>
-  <img id="sheet-img" alt="">
+  <div class="sheet-imgs" id="sheet-imgs"></div>
   <p id="sheet-tip"></p>
-  <button class="btn" id="sheet-close">关闭</button>
+  <div class="sheet-btns">
+    <button class="btn save" id="sheet-save" hidden>保存到手机</button>
+    <button class="btn" id="sheet-close">关闭</button>
+  </div>
 </div>
 
-<script src="assets/assets.js?v=202610261157"></script>
-<script src="data/stores.js?v=202610261157"></script>
-<script src="data/pinyin.js?v=202610261157"></script>
-<script src="data/activity.js?v=202610261157"></script>
-<script src="js/poster.js?v=202610261157"></script>
-<script src="data/templates.js?v=202610261157"></script>
-<script src="js/app.js?v=202610261157"></script>
+<script src="assets/assets.js?v=202610261201"></script>
+<script src="data/stores.js?v=202610261201"></script>
+<script src="data/pinyin.js?v=202610261201"></script>
+<script src="data/activity.js?v=202610261201"></script>
+<script src="js/poster.js?v=202610261201"></script>
+<script src="data/templates.js?v=202610261201"></script>
+<script src="js/app.js?v=202610261201"></script>
 </body>
 </html>

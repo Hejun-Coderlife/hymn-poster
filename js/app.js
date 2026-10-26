@@ -333,9 +333,9 @@
     return new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
   }
   function showSheet(src, tip) {
-    $('#sheet-img').src = src || '';
-    $('#sheet-img').hidden = !src;
+    $('#sheet-imgs').innerHTML = src ? `<img src="${src}" alt="">` : '';
     $('#sheet-tip').textContent = tip;
+    $('#sheet-save').hidden = true;
     $('#sheet').hidden = false;
   }
 
@@ -346,6 +346,13 @@
 
   const toBlob = (c, type, q) => new Promise(r => c.toBlob(r, type, q));
   const tick = () => new Promise(r => setTimeout(r, 0));
+
+  // 手机（iPhone / 安卓）能用系统分享面板存文件：图片可直接「存储图像」进相册
+  const canShareFiles = (() => {
+    try { return !!(navigator.canShare && navigator.canShare({ files: [new File([''], 'a.png', { type: 'image/png' })] })); }
+    catch (e) { return false; }
+  })();
+  const isPhoneNow = () => matchMedia('(max-width: 860px)').matches;
 
   async function exportFile(type) {
     if (busy) return;
@@ -360,46 +367,68 @@
     const label = btn.textContent;
     const c = document.createElement('canvas');
     try {
-      if (!many) {
-        tpl.draw(c, posterData(cur), assets, EXPORT_SCALE);
-        const base = '赫眉' + STORES[cur].name + '-海报';
-        if (type === 'png') {
-          deliver(await toBlob(c, 'image/png'), base + '.png', c.toDataURL('image/jpeg', 0.92));
-        } else {
-          const jpg = new Uint8Array(await (await toBlob(c, 'image/jpeg', 0.95)).arrayBuffer());
-          deliver(makePDF([{ jpg, w: c.width, h: c.height }]), base + '.pdf', c.toDataURL('image/jpeg', 0.92), true);
-        }
-        return;
-      }
-      // 多家：一家一家画。图片每家单独下载一张原图 PNG（不打包、不压缩）；PDF 合成多页
+      // 先把要存的文件全部生成好：图片每家一张原图 PNG（不打包、不压缩）；PDF 合成一份多页
+      const files = [];
       const pages = [];
+      const previews = [];
       for (let k = 0; k < selected.length; k++) {
-        btn.textContent = `生成中 ${k + 1} / ${selected.length}…`;
+        if (many) btn.textContent = `生成中 ${k + 1} / ${selected.length}…`;
         await tick();
         const i = selected[k];
         tpl.draw(c, posterData(i), assets, EXPORT_SCALE);
         if (type === 'png') {
-          deliver(await toBlob(c, 'image/png'), `赫眉${STORES[i].name}-海报.png`);
-          await new Promise(r => setTimeout(r, 400)); // 连续下载要留点间隔，浏览器才不会吞掉
+          const blob = await toBlob(c, 'image/png');
+          files.push(new File([blob], `赫眉${STORES[i].name}-海报.png`, { type: 'image/png' }));
+          previews.push(URL.createObjectURL(blob));
         } else {
-          pages.push({ jpg: new Uint8Array(await (await toBlob(c, 'image/jpeg', 0.95)).arrayBuffer()), w: c.width, h: c.height });
+          const jpg = await toBlob(c, 'image/jpeg', 0.95);
+          pages.push({ jpg: new Uint8Array(await jpg.arrayBuffer()), w: c.width, h: c.height });
+          if (k === 0) previews.push(URL.createObjectURL(jpg));
         }
       }
-      if (type === 'pdf') deliver(makePDF(pages), `赫眉海报-${selected.length}家店.pdf`);
+      if (type === 'pdf') {
+        const name = many ? `赫眉海报-${selected.length}家店.pdf` : `赫眉${STORES[selected[0]].name}-海报.pdf`;
+        files.push(new File([makePDF(pages)], name, { type: 'application/pdf' }));
+      }
+
+      if (canShareFiles && isPhoneNow() && !inWeChat) {
+        // 手机：先弹预览，再点「保存到手机」调起系统面板（分享必须由这次点击直接触发）
+        saveSheet(files, previews, type);
+      } else if (inWeChat) {
+        showSheet(previews[0], type === 'pdf'
+          ? '微信里无法下载 PDF，请点右上角「…」→「在浏览器打开」后再下载。下面的图片可以长按保存。'
+          : '长按图片 →「保存图片」');
+      } else {
+        for (const f of files) {
+          deliver(f, f.name);
+          if (files.length > 1) await new Promise(r => setTimeout(r, 900)); // 连续下载要留够间隔，浏览器才不会吞掉
+        }
+      }
     } finally {
       busy = false;
       btn.textContent = label;
     }
   }
 
-  function deliver(blob, filename, previewURL, isPDF) {
-    if (inWeChat) {
-      // 微信里不能直接下载：图片给长按保存，PDF 提示去浏览器
-      showSheet(previewURL, isPDF
-        ? '微信里无法下载 PDF，请点右上角「…」→「在浏览器打开」后再下载。下面的图片可以长按保存。'
-        : '长按图片 →「保存图片」');
-      return;
-    }
+  function saveSheet(files, previews, type) {
+    const n = files.length;
+    $('#sheet-imgs').innerHTML = previews.map(u => `<img src="${u}" alt="">`).join('');
+    $('#sheet-tip').textContent = type === 'pdf'
+      ? '点下面的按钮，在弹出的面板里选「存储到文件」'
+      : `点下面的按钮，在弹出的面板里选「存储${n > 1 ? ' ' + n + ' 张' : ''}图像」就进相册了；也可以长按图片保存`;
+    const btn = $('#sheet-save');
+    btn.textContent = type === 'pdf' ? '保存 PDF 到手机' : `保存${n > 1 ? ' ' + n + ' 张' : ''}到手机`;
+    btn.hidden = false;
+    btn.onclick = async () => {
+      try { await navigator.share({ files }); }
+      catch (e) {
+        if (e.name !== 'AbortError') $('#sheet-tip').textContent = '没能打开保存面板，请长按上面的图片保存';
+      }
+    };
+    $('#sheet').hidden = false;
+  }
+
+  function deliver(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
