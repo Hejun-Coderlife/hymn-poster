@@ -44,6 +44,7 @@
   .card.on canvas { outline: 3px solid var(--ink); outline-offset: 3px; }
   .card figcaption { font-size: 13px; color: var(--t3); margin-top: 8px; text-align: center; }
   .card.on figcaption { color: var(--ink); font-weight: 600; }
+  .card .info { cursor: auto; text-align: left; margin-top: 12px; padding: 12px 14px 14px; border: 1px solid var(--ink); border-top-width: 3px; }
   .hint-mobile .many, body.multi .hint-mobile .one { display: none; }
   body.multi .hint-mobile .many { display: inline; }
   body:not(.ready) #preview { opacity: .3; }
@@ -208,7 +209,7 @@
       <canvas id="preview" width="1254" height="1254"></canvas>
     </div>
     <div class="loading">字体加载中…</div>
-    <div class="hint-mobile"><span class="one">点海报可看大图</span><span class="many">点一张切换编辑，再点一次看大图</span></div>
+    <div class="hint-mobile"><span class="one">点海报可看大图</span><span class="many">点哪张，信息就在哪张下面；再点一次看大图</span></div>
     <div class="actions">
       <button class="btn solid" id="dl-png">下载图片</button>
       <button class="btn" id="dl-pdf">下载 PDF</button>
@@ -273,12 +274,12 @@
   <button class="btn" id="sheet-close">关闭</button>
 </div>
 
-<script src="assets/assets.js?v=202610261151"></script>
-<script src="data/stores.js?v=202610261151"></script>
-<script src="data/pinyin.js?v=202610261151"></script>
-<script src="data/activity.js?v=202610261151"></script>
-<script src="js/poster.js?v=202610261151"></script>
-<script src="data/templates.js?v=202610261151"></script>
-<script src="js/app.js?v=202610261151"></script>
+<script src="assets/assets.js?v=202610261154"></script>
+<script src="data/stores.js?v=202610261154"></script>
+<script src="data/pinyin.js?v=202610261154"></script>
+<script src="data/activity.js?v=202610261154"></script>
+<script src="js/poster.js?v=202610261154"></script>
+<script src="data/templates.js?v=202610261154"></script>
+<script src="js/app.js?v=202610261154"></script>
 </body>
 </html>

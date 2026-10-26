@@ -66,15 +66,18 @@
       const multi = selected.length > 1;
       document.body.classList.toggle('multi', multi);
       tpl.draw(preview, posterData(cur), assets, 1); // 单选 / 电脑多选时的大图
-      if (!multi) return;
+      if (!multi) { restoreInfo(); return; }
       renderGrid();
     });
   }
   // 多选：每家一张，按勾选顺序排；分批画，免得一次画几十张卡住页面
   async function renderGrid() {
     const my = ++gen;
-    for (const [i, el] of cards) if (!selected.includes(i)) { el.remove(); cards.delete(i); }
-    selected.forEach(i => {
+    for (const [i, el] of cards) if (!selected.includes(i)) {
+      if (el.contains(infoSec)) restoreInfo();
+      el.remove(); cards.delete(i);
+    }
+    selected.forEach((i, k) => {
       let el = cards.get(i);
       if (!el) {
         el = document.createElement('figure');
@@ -84,8 +87,10 @@
         cards.set(i, el);
       }
       el.classList.toggle('on', i === cur);
-      grid.appendChild(el); // 按顺序重新排
+      // 按顺序排；位置没变就别动它，否则正在输入的框会失焦、手机键盘被收起
+      if (grid.children[k] !== el) grid.insertBefore(el, grid.children[k] || null);
     });
+    placeInfo();
     // 先画正在编辑的那张，其余随后
     const order = [cur].concat(selected.filter(i => i !== cur));
     for (let k = 0; k < order.length; k++) {
@@ -94,6 +99,20 @@
       if (k % 4 === 3) await new Promise(r => setTimeout(r, 0));
     }
   }
+
+  // 手机多选时，「本店信息」挪到当前那张海报正下方；其余情况放回右侧原位
+  const infoSec = $('.info');
+  const infoHome = document.createComment('info');
+  infoSec.parentNode.insertBefore(infoHome, infoSec);
+  function restoreInfo() {
+    if (infoSec.previousSibling !== infoHome) infoHome.parentNode.insertBefore(infoSec, infoHome.nextSibling);
+  }
+  function placeInfo() {
+    const card = selected.length > 1 && matchMedia('(max-width: 860px)').matches && cards.get(cur);
+    if (!card) return restoreInfo();
+    if (infoSec.parentNode !== card) card.appendChild(infoSec);
+  }
+  matchMedia('(max-width: 860px)').addEventListener('change', placeInfo);
 
   // ---------- 门店选择：可搜索、可多选 ----------
   const PY = window.PINYIN || {};
@@ -224,7 +243,7 @@
     $('#chips').innerHTML = selected.map(i =>
       `<span class="chip${i === cur ? ' on' : ''}" data-c="${i}">${STORES[i].name}<b data-x="${i}" title="移除">×</b></span>`).join('');
     $('#chips').hidden = !n;
-    $('#pick-tip').textContent = n > 1 ? `已选 ${n} 家 · 点上面的店名切换预览` : '可以搜索，也可以勾选多家一起下载';
+    $('#pick-tip').textContent = n > 1 ? `已选 ${n} 家 · 点店名或海报切换` : '可以搜索，也可以勾选多家一起下载';
     const info = cur >= 0 ? infoOf(cur) : { phone: '', address: '' };
     $('#phone').value = info.phone;
     $('#address').value = info.address;
@@ -287,7 +306,7 @@
     // 网格：点一张 = 切到这家编辑；手机上再点已选中的那张 = 看大图
     grid.addEventListener('click', e => {
       const card = e.target.closest('.card');
-      if (!card) return;
+      if (!card || e.target.closest('.info')) return; // 在海报下面的信息框里点，不算点海报
       const i = +card.dataset.i;
       if (i === cur) { if (isPhone()) enlarge(i); return; }
       setSelected(selected, i);
