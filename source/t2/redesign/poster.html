@@ -1,0 +1,144 @@
+<!doctype html>
+<!-- 购物节海报重新设计·样张（3 个方向，?v=1/2/3&store=店名）。2000×2826 = A4，只用于出图比稿 -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: SerifL; src: url(../../../fonts-src/NotoSerifSC-Light.otf); }
+  @font-face { font-family: SerifR; src: url(../../../fonts-src/NotoSerifSC-Regular.otf); }
+  @font-face { font-family: SerifM; src: url(../../../fonts-src/NotoSerifSC-Medium.otf); }
+  @font-face { font-family: SerifSB; src: url(../../../fonts-src/NotoSerifSC-SemiBold.otf); }
+  @font-face { font-family: SerifB; src: url(../../../fonts-src/NotoSerifSC-Bold.otf); }
+  @font-face { font-family: Bodoni; src: url(../../../fonts-src/BodoniModa.ttf); font-weight: 400 900; }
+  @font-face { font-family: Bodoni; src: url(../../../fonts-src/BodoniModa.ttf); font-weight: 400 900; font-style: italic; }
+  @font-face { font-family: Sans; src: url(../../../fonts-src/NotoSansSC-Regular.otf); }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 2000px; height: 2826px; overflow: hidden; }
+  .poster { position: relative; width: 2000px; height: 2826px; overflow: hidden; display: flex; flex-direction: column; }
+  .poster > .foot { margin-top: auto; }
+  .logo { display: block; background: currentColor; -webkit-mask: url(../../../assets/logo-ink.png) center / contain no-repeat; mask: url(../../../assets/logo-ink.png) center / contain no-repeat; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .grid img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+  .qr { display: block; }
+  .center { text-align: center; }
+
+  /* ============ 1 · 象牙经典 Ivory Classic ============ */
+  .v1 { background: radial-gradient(ellipse at 50% 30%, #fbf7f1 0%, #f3ece2 60%, #ece3d6 100%); color: #1c1a19; }
+  .v1 .frame { position: absolute; inset: 56px; border: 2px solid #b8956a; }
+  .v1 .frame::after { content: ''; position: absolute; inset: 14px; border: 1px solid rgba(184,149,106,.55); }
+  .v1 .logo { width: 330px; height: 82px; margin: 160px auto 0; color: #1c1a19; }
+  .v1 .en { font: 400 34px Bodoni; letter-spacing: .62em; color: #8b6b42; margin-top: 70px; padding-left: .62em; }
+  .v1 h1 { font: 400 156px SerifR; letter-spacing: .3em; padding-left: .3em; margin-top: 34px; line-height: 1.15; }
+  .v1 .rule { width: 520px; height: 30px; margin: 34px auto 0; position: relative; }
+  .v1 .rule::before { content: ''; position: absolute; left: 0; right: 0; top: 15px; height: 1.5px; background: linear-gradient(90deg, transparent, #b8956a 25%, #b8956a 75%, transparent); }
+  .v1 .rule::after { content: ''; position: absolute; left: 50%; top: 8px; width: 14px; height: 14px; background: #f5efe6; border: 1.5px solid #b8956a; transform: translateX(-50%) rotate(45deg); }
+  .v1 .store { font: 300 64px SerifL; letter-spacing: .42em; padding-left: .42em; margin-top: 30px; }
+  .v1 .offer { margin-top: 100px; display: flex; justify-content: center; align-items: flex-end; gap: 46px; }
+  .v1 .offer .side { font: 400 54px SerifR; letter-spacing: .5em; writing-mode: vertical-rl; color: #1c1a19; margin-bottom: 70px; }
+  .v1 .offer .num { font: italic 500 520px/0.78 Bodoni; color: #fb1e43; letter-spacing: -.02em; }
+  .v1 .offer .zhe { font: 400 150px SerifR; color: #fb1e43; margin-bottom: 30px; }
+  .v1 .date { margin-top: 70px; font: 400 58px SerifR; letter-spacing: .26em; }
+  .v1 .date small { display: block; font: 400 28px Bodoni; letter-spacing: .6em; color: #8b6b42; margin-bottom: 18px; }
+  .v1 .grid { margin: 110px 160px 0; gap: 22px; }
+  .v1 .grid img { outline: 1px solid rgba(184,149,106,.6); outline-offset: 6px; }
+  .v1 .foot { margin: auto 160px 150px; display: flex; align-items: center; gap: 56px; border-top: 1.5px solid #b8956a; padding-top: 44px; }
+  .v1 .qr { width: 210px; height: 210px; }
+  .v1 .info { font: 400 44px SerifR; letter-spacing: .08em; line-height: 1.9; }
+  .v1 .info b { font: 400 26px Bodoni; letter-spacing: .4em; color: #8b6b42; display: inline-block; width: 240px; }
+
+  /* ============ 2 · 黑金夜宴 Noir & Gold ============ */
+  .v2 { background: radial-gradient(ellipse 120% 70% at 50% 34%, #3b0f18 0%, #1a0a0d 45%, #0b0809 100%); color: #e9d3a6; }
+  .v2 .gold { background: linear-gradient(180deg, #f8e7c1 0%, #d9b57a 45%, #b48a4e 60%, #f0d9a8 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .v2 .logo { width: 330px; height: 82px; margin: 140px auto 0; background: linear-gradient(180deg, #f8e7c1, #c9a063); }
+  .v2 .en { font: 400 32px Bodoni; letter-spacing: .7em; padding-left: .7em; margin-top: 80px; color: #c9a063; }
+  .v2 h1 { font: 500 168px SerifM; letter-spacing: .26em; padding-left: .26em; margin-top: 30px; line-height: 1.15; }
+  .v2 .store { margin-top: 38px; display: flex; align-items: center; justify-content: center; gap: 40px; font: 300 60px SerifL; letter-spacing: .4em; color: #f1e2c4; }
+  .v2 .store::before, .v2 .store::after { content: ''; width: 150px; height: 1.5px; background: linear-gradient(90deg, transparent, #fb1e43); }
+  .v2 .store::after { transform: scaleX(-1); }
+  .v2 .offer { margin-top: 100px; position: relative; }
+  .v2 .offer .label { font: 400 56px SerifR; letter-spacing: .6em; padding-left: .6em; color: #f1e2c4; }
+  .v2 .offer .num { font: 400 560px/0.9 Bodoni; letter-spacing: -.01em; margin-top: 10px; display: inline-block; }
+  .v2 .offer .zhe { font: 600 150px SerifSB; color: #fb1e43; display: inline-block; vertical-align: 40px; margin-left: 14px; }
+  .v2 .date { margin-top: 40px; align-self: center; border: 1.5px solid #c9a063; padding: 22px 70px; font: 400 52px SerifR; letter-spacing: .3em; color: #f1e2c4; }
+  .v2 .grid { margin: 100px 150px 0; gap: 18px; }
+  .v2 .grid img { outline: 1.5px solid rgba(201,160,99,.75); }
+  .v2 .foot { margin: auto 150px 140px; display: flex; align-items: center; justify-content: space-between; }
+  .v2 .qrbox { background: #fff; padding: 14px; outline: 1.5px solid #c9a063; outline-offset: 8px; }
+  .v2 .qr { width: 196px; height: 196px; }
+  .v2 .info { font: 400 44px SerifR; letter-spacing: .1em; line-height: 1.9; color: #f1e2c4; text-align: right; }
+  .v2 .info b { font: 400 26px Bodoni; letter-spacing: .45em; color: #c9a063; margin-right: 30px; }
+
+  /* ============ 3 · 粉色杂志 Blush Editorial ============ */
+  .v3 { background: #f6d6d8 url(../bg.png) center / cover; color: #141213; }
+  .v3::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,246,246,.55), rgba(255,240,241,.25) 50%, rgba(255,246,246,.6)); }
+  .v3 > * { position: relative; }
+  .v3 .mast { font: 400 420px/1 Bodoni; letter-spacing: .1em; padding-left: .1em; margin-top: 140px; color: #141213; }
+  .v3 .strap { margin: 20px 120px 0; display: flex; justify-content: space-between; border-top: 2px solid #141213; border-bottom: 1px solid #141213; padding: 16px 0; font: 400 30px Bodoni; letter-spacing: .4em; }
+  .v3 .body { display: grid; grid-template-columns: 1fr 560px; margin: 110px 120px 0; }
+  .v3 .num { font: italic 400 660px/0.8 Bodoni; color: #fb1e43; letter-spacing: -.03em; }
+  .v3 .zhe { font: 400 170px SerifR; color: #fb1e43; margin-left: 30px; }
+  .v3 .lead { font: 300 50px SerifL; letter-spacing: .5em; margin-top: 46px; }
+  .v3 .right { border-left: 1.5px solid #141213; padding-left: 60px; display: flex; flex-direction: column; justify-content: space-between; }
+  .v3 .right h1 { font: 500 104px/1.4 SerifM; letter-spacing: .1em; white-space: nowrap; }
+  .v3 .right .store { font: 400 46px SerifR; letter-spacing: .2em; line-height: 1.5; }
+  .v3 .right .store small { display: block; font: 400 26px Bodoni; letter-spacing: .45em; margin-bottom: 10px; color: #6a5a5c; }
+  .v3 .date { margin: 100px 120px 0; background: #141213; color: #fff; display: flex; justify-content: space-between; align-items: center; padding: 30px 56px; font: 400 52px SerifR; letter-spacing: .26em; }
+  .v3 .date small { font: 400 28px Bodoni; letter-spacing: .5em; color: #f3b9c1; }
+  .v3 .grid { margin: 60px 120px 0; gap: 16px; }
+  .v3 .foot { margin: auto 120px 120px; display: flex; align-items: flex-end; justify-content: space-between; border-top: 2px solid #141213; padding-top: 36px; }
+  .v3 .qr { width: 200px; height: 200px; background: #fff; padding: 10px; }
+  .v3 .info { font: 400 42px SerifR; letter-spacing: .08em; line-height: 1.8; }
+  .v3 .info b { font: 400 24px Bodoni; letter-spacing: .45em; color: #6a5a5c; display: inline-block; width: 230px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const v = q.get('v') || '1';
+  const store = q.get('store') || '海曙联丰路店';
+  const date = q.get('date') || '10月13日 — 14日';
+  const addr = q.get('addr') || '海曙区联丰路90号';
+  const tel = q.get('tel') || '13336880191';
+  const qr = `../../qr-clean/${store}.png`;
+  const grid = `<div class="grid">${[1,2,3,4,5,6,7,8].map(i => `<img src="../products/p${i}.png">`).join('')}</div>`;
+  const T = {
+    1: `<div class="poster v1 center">
+      <div class="frame"></div>
+      <i class="logo"></i>
+      <div class="en">THE ANNUAL SHOPPING FESTIVAL</div>
+      <h1>一年一度购物节</h1>
+      <div class="rule"></div>
+      <div class="store">赫眉 · ${store}</div>
+      <div class="offer"><span class="side">全场护肤彩妆</span><span class="num">6.7</span><span class="zhe">折</span></div>
+      <div class="date"><small>EVENT DATE</small>${date}</div>
+      ${grid}
+      <div class="foot"><img class="qr" src="${qr}"><div class="info"><div><b>ADDRESS</b>${addr}</div><div><b>HOTLINE</b>${tel}</div></div></div>
+    </div>`,
+    2: `<div class="poster v2 center">
+      <i class="logo"></i>
+      <div class="en">THE ANNUAL SHOPPING FESTIVAL</div>
+      <h1 class="gold">一年一度购物节</h1>
+      <div class="store">赫眉 · ${store}</div>
+      <div class="offer"><div class="label">全场护肤彩妆</div><span class="num gold">6.7</span><span class="zhe">折</span></div>
+      <div class="date">活动时间　${date}</div>
+      ${grid}
+      <div class="foot"><div class="qrbox"><img class="qr" src="${qr}"></div><div class="info"><div><b>ADDRESS</b>${addr}</div><div><b>HOTLINE</b>${tel}</div></div></div>
+    </div>`,
+    3: `<div class="poster v3">
+      <div class="mast center">HYMN</div>
+      <div class="strap"><span>赫眉</span><span>ANNUAL SHOPPING FESTIVAL</span><span>2026</span></div>
+      <div class="body">
+        <div><span class="num">6.7</span><span class="zhe">折</span><div class="lead">全场护肤彩妆</div></div>
+        <div class="right"><h1>一年一度<br>购物节</h1><div class="store"><small>BOUTIQUE</small>赫眉<br>${store}</div></div>
+      </div>
+      <div class="date"><small>EVENT DATE</small><span>活动时间　${date}</span></div>
+      ${grid}
+      <div class="foot"><div class="info"><div><b>ADDRESS</b>${addr}</div><div><b>HOTLINE</b>${tel}</div></div><img class="qr" src="${qr}"></div>
+    </div>`,
+  };
+  document.getElementById('root').innerHTML = T[v];
+</script>
+</body>
+</html>

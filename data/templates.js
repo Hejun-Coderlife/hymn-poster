@@ -11,10 +11,19 @@ window.TEMPLATES = [
     defaults: assets => {
       const A = window.ACTIVITY;
       return {
-        title: '赫眉' + A.event, date: A.date, price: A.price, worth: A.worth, bundle: A.bundle,
+        title: '赫眉' + A.event, price: A.price, worth: A.worth, bundle: A.bundle,
         item1: { ...A.item1 }, item2: { ...A.item2 }, item3: { ...A.item3 },
         img1: assets.item1, img2: assets.item2,
       };
     },
+  },
+  {
+    id: 'festival',
+    name: '购物节 6.7折 + 礼品券 · A4 正反面',
+    draw: (...a) => Poster2.draw(...a),
+    drawPage: (...a) => Poster2.drawPage(...a),
+    pages: ['正面', '背面'], // 导出时每页一张，文件名带上
+    exportScale: 1,          // 原稿 2000×2826，约 240dpi
+    defaults: () => ({ title: '赫眉周年庆' }), // 背面大标题，选店后自动变成 赫眉XX店周年庆
   },
 ];

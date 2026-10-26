@@ -8,7 +8,7 @@
   const MANAGERS = ['官卜妮', '杜海霞', '张维'];
 
   const state = {
-    title: '赫眉' + A.event, date: A.date, price: A.price, worth: A.worth, bundle: A.bundle,
+    title: '赫眉' + A.event, date: '', price: A.price, worth: A.worth, bundle: A.bundle,
     item1: { ...A.item1 }, item2: { ...A.item2 }, item3: { ...A.item3 },
     img1: null, img2: null,
   };
@@ -30,6 +30,8 @@
     const faces = [
       new FontFace('HymnSerif', `url(${ASSETS.serif})`, { weight: '900' }),
       new FontFace('HymnSans', `url(${ASSETS.sans})`, { weight: '400' }),
+      new FontFace('HymnSansBlack', `url(${ASSETS.sansBlack})`, { weight: '900' }),
+      new FontFace('HymnSansBold', `url(${ASSETS.sansBold})`, { weight: '700' }),
     ];
     await Promise.all(faces.map(f => f.load().then(() => document.fonts.add(f)).catch(() => {})));
   }
@@ -48,7 +50,8 @@
   }
   function posterData(i) {
     if (i < 0) return { ...state, phone: '', address: '' };
-    return { ...state, ...infoOf(i), title: i === titleStore ? state.title : swapTitle(state.title, titleStore, i) };
+    return { ...state, ...infoOf(i), store: STORES[i].name, qr: assets && assets.qr[STORES[i].name],
+      title: i === titleStore ? state.title : swapTitle(state.title, titleStore, i) };
   }
 
   // ---------- 预览 ----------
@@ -58,6 +61,11 @@
   const grid = $('#grid');
   const cards = new Map();  // 门店下标 → 网格里的那张卡片
   let gen = 0;              // 每次重画加 1，旧的分批任务看到就停
+  // 画到页面上的 canvas：按画出来的宽高比显示（正反面并排的是横的）
+  function paint(t, c, d, scale) {
+    t.draw(c, d, assets, scale);
+    c.style.aspectRatio = c.width + ' / ' + c.height;
+  }
   function render() {
     if (queued || !assets) return;
     queued = true;
@@ -65,7 +73,7 @@
       queued = false;
       const multi = selected.length > 1;
       document.body.classList.toggle('multi', multi);
-      tpl.draw(preview, posterData(cur), assets, 1); // 单选 / 电脑多选时的大图
+      paint(tpl, preview, posterData(cur), 1); // 单选 / 电脑多选时的大图
       if (!multi) { restoreInfo(); return; }
       renderGrid();
     });
@@ -95,7 +103,7 @@
     const order = [cur].concat(selected.filter(i => i !== cur));
     for (let k = 0; k < order.length; k++) {
       if (my !== gen) return;
-      tpl.draw(cards.get(order[k]).querySelector('canvas'), posterData(order[k]), assets, 0.5);
+      paint(tpl, cards.get(order[k]).querySelector('canvas'), posterData(order[k]), 0.5);
       if (k % 4 === 3) await new Promise(r => setTimeout(r, 0));
     }
   }
@@ -188,7 +196,7 @@
     if (cur >= 0 && cur !== titleStore) {
       state.title = swapTitle(state.title, titleStore, cur);
       titleStore = cur;
-      $('#title').value = state.title;
+      document.querySelectorAll('[data-k=title]').forEach(el => { el.value = state.title; });
     }
     localStorage.setItem('hymn-poster-stores', selected.map(i => STORES[i].name).join(','));
     refreshStore();
@@ -259,8 +267,9 @@
     $('#address').value = info.address;
     $('#info-name').textContent = cur >= 0 ? ' · ' + STORES[cur].name : '';
     $('#hint-addr').hidden = !(cur >= 0 && !info.address);
-    $('#dl-png').textContent = n > 1 ? `下载 ${n} 张图片` : '下载图片';
-    $('#dl-pdf').textContent = n > 1 ? `下载 PDF（${n} 页）` : '下载 PDF';
+    const k = n * (tpl.pages ? tpl.pages.length : 1); // 正反面的一家店出两张
+    $('#dl-png').textContent = k > 1 ? `下载 ${k} 张图片` : '下载图片';
+    $('#dl-pdf').textContent = k > 1 ? `下载 PDF（${k} 页）` : '下载 PDF';
     document.body.classList.toggle('no-store', !n);
     render();
   }
@@ -293,8 +302,9 @@
         render();
       });
     });
+    bindDate();
     $('#reset').addEventListener('click', () => {
-      Object.assign(state, tpl.defaults(assets), { title: '赫眉' + (cur >= 0 ? STORES[cur].name : '') + A.event });
+      Object.assign(state, tpl.defaults(assets), { date: state.date, title: '赫眉' + (cur >= 0 ? STORES[cur].name : '') + A.event });
       titleStore = cur;
       fillForm();
       render();
@@ -321,6 +331,31 @@
       if (i === cur) { if (isPhone()) enlarge(i); return; }
       setSelected(selected, i);
     });
+  }
+
+  // ---------- 活动日期（必选，不选不能下载） ----------
+  // 两个日期 → 海报上的文字：10月23日-25日 / 10月30日-11月2日 / 10月23日
+  function dateText(a, b) {
+    if (!a) return '';
+    if (b && b < a) [a, b] = [b, a];
+    const [, m1, d1] = a.split('-').map(Number);
+    const one = `${m1}月${d1}日`;
+    if (!b || b === a) return one;
+    const [, m2, d2] = b.split('-').map(Number);
+    return one + '-' + (m2 === m1 ? '' : m2 + '月') + d2 + '日';
+  }
+  function bindDate() {
+    const s = $('#d-start'), e = $('#d-end');
+    const upd = () => {
+      // 开始、结束都要填（只办一天就两个选同一天）
+      state.date = s.value && e.value ? dateText(s.value, e.value) : '';
+      document.body.classList.toggle('no-date', !state.date);
+      [s, e].forEach(el => { if (el.value) el.classList.remove('miss'); });
+      if (state.date) $('#hint-date').hidden = true;
+      render();
+    };
+    s.addEventListener('change', () => { e.min = s.value; upd(); });
+    e.addEventListener('change', upd);
   }
 
   function fillForm() {
@@ -357,6 +392,12 @@
   async function exportFile(type) {
     if (busy) return;
     if (!selected.length) { box.focus(); return; }
+    if (!state.date) {
+      $('#hint-date').hidden = false;
+      ['#d-start', '#d-end'].forEach(id => $(id).classList.toggle('miss', !$(id).value));
+      $('.sec.date').scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return;
+    }
     const many = selected.length > 1;
     if (many && inWeChat) {
       showSheet('', '微信里不能批量下载，请点右上角「…」→「在浏览器打开」后再下载。');
@@ -375,15 +416,20 @@
         if (many) btn.textContent = `生成中 ${k + 1} / ${selected.length}…`;
         await tick();
         const i = selected[k];
-        tpl.draw(c, posterData(i), assets, EXPORT_SCALE);
-        if (type === 'png') {
-          const blob = await toBlob(c, 'image/png');
-          files.push(new File([blob], `赫眉${STORES[i].name}-海报.png`, { type: 'image/png' }));
-          previews.push(URL.createObjectURL(blob));
-        } else {
-          const jpg = await toBlob(c, 'image/jpeg', 0.95);
-          pages.push({ jpg: new Uint8Array(await jpg.arrayBuffer()), w: c.width, h: c.height });
-          if (k === 0) previews.push(URL.createObjectURL(jpg));
+        const names = tpl.pages || [''];
+        for (let p = 0; p < names.length; p++) {
+          if (tpl.pages) tpl.drawPage(c, posterData(i), assets, tpl.exportScale, p);
+          else tpl.draw(c, posterData(i), assets, EXPORT_SCALE);
+          if (type === 'png') {
+            const blob = await toBlob(c, 'image/png');
+            files.push(new File([blob], `赫眉${STORES[i].name}-海报${names[p] ? '-' + names[p] : ''}.png`, { type: 'image/png' }));
+            previews.push(URL.createObjectURL(blob));
+          } else {
+            const jpg = await toBlob(c, 'image/jpeg', 0.95);
+            pages.push({ jpg: new Uint8Array(await jpg.arrayBuffer()), w: c.width, h: c.height });
+            if (k === 0) previews.push(URL.createObjectURL(jpg));
+          }
+          await tick();
         }
       }
       if (type === 'pdf') {
@@ -484,8 +530,10 @@
       `<a class="tpl" href="?t=${t.id}${storeFromURL()}" data-t="${t.id}"><canvas></canvas><div class="nm">${t.name}</div><div class="go">使用这个海报 →</div></a>`).join('');
     TEMPLATES.forEach((t, k) => {
       const d = { ...t.defaults(assets), ...info };
+      d.date = '10月23日-25日'; // 首页缩略图放个示例日期，编辑页里必须自己选
       d.title = d.title.replace(/^赫眉/, '赫眉' + (sample >= 0 ? STORES[sample].name : ''));
-      t.draw($('#tpl-list').children[k].querySelector('canvas'), d, assets, 0.5);
+      d.store = sample >= 0 ? STORES[sample].name : '';
+      paint(t, $('#tpl-list').children[k].querySelector('canvas'), d, 0.5);
     });
   }
   // 链接里有 ?t=模板 就进编辑页，没有就是首页
@@ -503,6 +551,9 @@
       fillForm();
     }
     $('#tpl-name').textContent = tpl.name;
+    document.body.classList.toggle('spread', !!tpl.pages);
+    document.querySelectorAll('.act [data-tpl]').forEach(el => { el.hidden = el.dataset.tpl !== tpl.id; });
+    refreshStore();
     render();
   }
 
@@ -510,8 +561,13 @@
   (async function init() {
     bind();
     await loadFonts();
-    const [logo, item1, item2, bg] = await Promise.all([ASSETS.logo, ASSETS.item1, ASSETS.item2, ASSETS.bg].map(loadImage));
-    assets = { logo, item1, item2, bg };
+    const [logo, item1, item2, bg, t2front, t2back, t2title] = await Promise.all(
+      [ASSETS.logo, ASSETS.item1, ASSETS.item2, ASSETS.bg, ASSETS.t2front, ASSETS.t2back, ASSETS.t2title]
+        .map(src => src ? loadImage(src) : null));
+    // 各店二维码：data/qr.js 里 店名 → 图片（还没有就空着）
+    const qr = {};
+    await Promise.all(Object.entries(window.STORE_QR || {}).map(async ([name, src]) => { qr[name] = await loadImage(src); }));
+    assets = { logo, item1, item2, bg, t2front, t2back, t2title, qr };
     Object.assign(state, tpl.defaults(assets));
     fillForm();
     // 链接里带 ?store=横溪店（多家用逗号隔开）就直接选好；否则用上次选的

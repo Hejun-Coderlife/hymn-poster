@@ -9,9 +9,16 @@ FILES = {
     'bg': ('assets/bg.jpg', 'image/jpeg'),
     'item1': ('assets/item1.jpg', 'image/jpeg'),
     'item2': ('assets/item2.jpg', 'image/jpeg'),
+    # 第2个海报（购物节正反面），底图由 tools/build_t2.py 生成
+    'sansBlack': ('assets/sans-black.woff2', 'font/woff2'),
+    'sansBold': ('assets/sans-bold.woff2', 'font/woff2'),
+    't2front': ('assets/t2-front.jpg', 'image/jpeg'),
+    't2back': ('assets/t2-back.jpg', 'image/jpeg'),
+    't2title': ('assets/t2-title.webp', 'image/webp'),
 }
 out = {}
 for k, (p, mime) in FILES.items():
+    if not os.path.exists(os.path.join(ROOT, p)): continue
     with open(os.path.join(ROOT, p), 'rb') as f:
         out[k] = 'data:%s;base64,%s' % (mime, base64.b64encode(f.read()).decode())
 with open(os.path.join(ROOT, 'assets/assets.js'), 'w') as f:

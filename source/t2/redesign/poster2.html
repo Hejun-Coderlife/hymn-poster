@@ -1,0 +1,143 @@
+<!doctype html>
+<!-- 购物节海报重新设计·第二轮样张（?v=4/5/6&store=店名）。2000×2826 = A4 -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: SerifL; src: url(../../../fonts-src/NotoSerifSC-Light.otf); }
+  @font-face { font-family: SerifR; src: url(../../../fonts-src/NotoSerifSC-Regular.otf); }
+  @font-face { font-family: SerifM; src: url(../../../fonts-src/NotoSerifSC-Medium.otf); }
+  @font-face { font-family: SerifSB; src: url(../../../fonts-src/NotoSerifSC-SemiBold.otf); }
+  @font-face { font-family: SerifB; src: url(../../../fonts-src/NotoSerifSC-Bold.otf); }
+  @font-face { font-family: Bodoni; src: url(../../../fonts-src/BodoniModa.ttf); font-weight: 400 900; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 2000px; height: 2826px; overflow: hidden; }
+  .poster { position: relative; width: 2000px; height: 2826px; overflow: hidden; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  /* 纸张颗粒 */
+  .poster::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5; mix-blend-mode: multiply;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .45  0 0 0 0 .4  0 0 0 .09 0'/></filter><rect width='400' height='400' filter='url(%23n)'/></svg>"); }
+  .poster > * { position: relative; z-index: 1; }
+  .logo { display: block; background: currentColor; -webkit-mask: url(../../../assets/logo-ink.png) center / contain no-repeat; mask: url(../../../assets/logo-ink.png) center / contain no-repeat; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .grid img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+  .foil { background: linear-gradient(175deg, #7a5326 0%, #c9a463 22%, #fff1cf 40%, #d4af6c 55%, #8c6230 78%, #e3c68d 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .en { font: 400 30px Bodoni; letter-spacing: .62em; padding-left: .62em; }
+
+  /* ============ 4 · 香槟缎面 ============ */
+  .v4 { background:
+      radial-gradient(ellipse 60% 30% at 20% 38%, rgba(255,255,255,.75), transparent 70%),
+      radial-gradient(ellipse 70% 25% at 85% 52%, rgba(255,236,236,.8), transparent 70%),
+      radial-gradient(ellipse 90% 40% at 50% 8%, rgba(255,250,244,.9), transparent 70%),
+      linear-gradient(170deg, #f6e9df 0%, #f1dccf 45%, #ebcfc2 100%); color: #6d1a2a; }
+  .v4 .logo { width: 300px; height: 75px; margin-top: 150px; color: #8c6a3f; }
+  .v4 .en { margin-top: 64px; color: #9a7646; }
+  .v4 h1 { font: 700 176px SerifB; letter-spacing: .2em; padding-left: .2em; margin-top: 26px; line-height: 1.2; filter: drop-shadow(0 6px 8px rgba(120,70,40,.22)); }
+  .v4 .store { margin-top: 26px; display: flex; align-items: center; gap: 36px; font: 500 58px SerifM; letter-spacing: .36em; color: #6d1a2a; }
+  .v4 .store::before, .v4 .store::after { content: ''; width: 170px; height: 2px; background: linear-gradient(90deg, transparent, #b8925c); }
+  .v4 .store::after { transform: scaleX(-1); }
+  .v4 .label { margin-top: 70px; font: 600 62px SerifSB; letter-spacing: .5em; padding-left: .5em; color: #6d1a2a; }
+  .v4 .hero { width: 1420px; margin-top: 4px; mix-blend-mode: multiply; }
+  .v4 .date { margin-top: 10px; padding: 22px 80px; border-radius: 80px; background: rgba(255,250,245,.75); border: 2px solid #c4a06a; font: 500 54px SerifM; letter-spacing: .24em; color: #6d1a2a; box-shadow: 0 10px 30px rgba(140,80,60,.12); }
+  .v4 .grid { width: 1720px; margin-top: 90px; gap: 26px; }
+  .v4 .grid img { border: 12px solid #fffaf4; box-shadow: 0 12px 28px rgba(130,70,55,.16); }
+  .v4 .foot { width: 1720px; margin-top: auto; margin-bottom: 130px; display: flex; align-items: center; gap: 50px; border-top: 2px solid #c4a06a; padding-top: 40px; text-align: left; }
+  .v4 .qr { width: 210px; height: 210px; border: 12px solid #fff; box-shadow: 0 8px 20px rgba(130,70,55,.15); }
+  .v4 .info { font: 500 44px SerifM; letter-spacing: .08em; line-height: 1.9; color: #4a1520; }
+  .v4 .info b { font: 400 26px Bodoni; letter-spacing: .4em; color: #9a7646; display: inline-block; width: 240px; }
+
+  /* ============ 5 · 正红色块 ============ */
+  .v5 { background: #f7f1ea; }
+  .v5 .red { width: 2000px; height: 1600px; background: radial-gradient(ellipse 80% 60% at 30% 30%, #e42a45, #c8132f 60%, #a80c26 100%); color: #fff; position: relative; display: grid; grid-template-columns: 1fr 420px; padding: 140px 130px 0 150px; text-align: left; }
+  .v5 .red .logo { width: 280px; height: 70px; color: #fff; }
+  .v5 .red .en { color: rgba(255,255,255,.75); padding-left: 0; margin-top: 50px; font-size: 28px; }
+  .v5 .red .lead { font: 300 66px SerifL; letter-spacing: .48em; margin-top: 150px; }
+  .v5 .red .num { font: 300 640px/0.9 SerifL; letter-spacing: -.04em; margin-top: 10px; margin-left: -30px; }
+  .v5 .red .num small { font: 400 200px SerifR; letter-spacing: 0; margin-left: 30px; }
+  .v5 .red .side { border-left: 2px solid rgba(255,255,255,.7); padding-left: 70px; display: flex; gap: 46px; justify-content: flex-end; }
+  .v5 .red .side h1 { writing-mode: vertical-rl; font: 500 150px SerifM; letter-spacing: .22em; }
+  .v5 .red .side .store { writing-mode: vertical-rl; font: 300 54px SerifL; letter-spacing: .4em; margin-top: 260px; }
+  .v5 .red .date { position: absolute; left: 150px; bottom: 120px; font: 400 54px SerifR; letter-spacing: .26em; border-top: 2px solid rgba(255,255,255,.8); padding-top: 34px; }
+  .v5 .red .date small { font: 400 26px Bodoni; letter-spacing: .5em; margin-right: 40px; color: rgba(255,255,255,.75); }
+  .v5 .grid { width: 1700px; margin-top: 110px; gap: 22px; }
+  .v5 .foot { width: 1700px; margin-top: auto; margin-bottom: 130px; display: flex; align-items: center; justify-content: space-between; text-align: left; }
+  .v5 .qr { width: 210px; height: 210px; }
+  .v5 .info { font: 400 46px SerifR; letter-spacing: .08em; line-height: 1.9; color: #b80f2c; }
+  .v5 .info b { font: 400 26px Bodoni; letter-spacing: .4em; color: #8a7a70; display: inline-block; width: 240px; }
+
+  /* ============ 6 · 拱门画框 ============ */
+  .v6 { background: radial-gradient(ellipse at 50% 20%, #fdf9f3, #f4ece2 70%, #eee3d6); color: #8e1630; }
+  .v6 .logo { width: 280px; height: 70px; margin-top: 120px; color: #8e1630; }
+  .v6 .store { margin-top: 50px; font: 400 52px SerifR; letter-spacing: .5em; padding-left: .5em; color: #6b5a50; }
+  .v6 h1 { font: 600 164px SerifSB; letter-spacing: .22em; padding-left: .22em; margin-top: 18px; line-height: 1.2; color: #8e1630; }
+  .v6 .en { margin-top: 16px; color: #a8875a; }
+  .v6 .arch { position: relative; width: 1460px; height: 1120px; margin-top: 70px; border-radius: 730px 730px 0 0; overflow: hidden; background: #f6d3d5 url(../bg.png) center 45% / cover; box-shadow: 0 30px 60px rgba(120,60,50,.18); }
+  .v6 .archline { position: absolute; width: 1520px; height: 1150px; top: -30px; left: 50%; transform: translateX(-50%); border: 2.5px solid #c4a06a; border-bottom: 0; border-radius: 760px 760px 0 0; pointer-events: none; }
+  .v6 .arch .label { position: absolute; top: 300px; left: 0; right: 0; font: 600 64px SerifSB; letter-spacing: .5em; padding-left: .5em; color: #fff; text-shadow: 0 4px 16px rgba(160,40,60,.35); }
+  .v6 .arch .hero { position: absolute; left: 50%; top: 380px; width: 1280px; transform: translateX(-50%); mix-blend-mode: multiply; }
+  .v6 .arch .date { position: absolute; left: 50%; bottom: 60px; transform: translateX(-50%); white-space: nowrap; padding: 20px 70px; background: rgba(255,255,255,.9); border-radius: 60px; font: 500 52px SerifM; letter-spacing: .24em; color: #8e1630; }
+  .v6 .wrap { position: relative; margin-top: 30px; }
+  .v6 .grid { width: 1720px; margin-top: 70px; gap: 22px; }
+  .v6 .grid img { border-radius: 6px; }
+  .v6 .foot { width: 1720px; margin-top: auto; margin-bottom: 110px; display: flex; align-items: center; justify-content: space-between; text-align: left; border-top: 2px solid #c4a06a; padding-top: 34px; }
+  .v6 .qr { width: 190px; height: 190px; }
+  .v6 .info { font: 400 42px SerifR; letter-spacing: .08em; line-height: 1.85; color: #4a2a2a; }
+  .v6 .info b { font: 400 24px Bodoni; letter-spacing: .4em; color: #a8875a; display: inline-block; width: 230px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const v = q.get('v') || '4';
+  const store = q.get('store') || '海曙联丰路店';
+  const date = q.get('date') || '10月13日 — 14日';
+  const addr = q.get('addr') || '海曙区联丰路90号';
+  const tel = q.get('tel') || '13336880191';
+  const qr = `<img class="qr" src="../../qr-clean/${store}.png">`;
+  const grid = `<div class="grid">${[1,2,3,4,5,6,7,8].map(i => `<img src="../products/p${i}.png">`).join('')}</div>`;
+  const info = `<div class="info"><div><b>ADDRESS</b>${addr}</div><div><b>HOTLINE</b>${tel}</div></div>`;
+  const T = {
+    4: `<div class="poster v4">
+      <i class="logo"></i>
+      <div class="en">THE ANNUAL SHOPPING FESTIVAL</div>
+      <h1 class="foil">一年一度购物节</h1>
+      <div class="store">赫眉 · ${store}</div>
+      <div class="label">全场护肤彩妆</div>
+      <img class="hero" src="../el-67.png">
+      <div class="date">活动时间　${date}</div>
+      ${grid}
+      <div class="foot">${qr}${info}</div>
+    </div>`,
+    5: `<div class="poster v5">
+      <div class="red">
+        <div>
+          <i class="logo"></i>
+          <div class="en">THE ANNUAL SHOPPING FESTIVAL</div>
+          <div class="lead">全场护肤彩妆</div>
+          <div class="num">6.7<small>折</small></div>
+        </div>
+        <div class="side"><div class="store">赫眉 · ${store}</div><h1>一年一度购物节</h1></div>
+        <div class="date"><small>EVENT DATE</small>${date}</div>
+      </div>
+      ${grid}
+      <div class="foot">${info}${qr}</div>
+    </div>`,
+    6: `<div class="poster v6">
+      <i class="logo"></i>
+      <div class="store">赫眉 · ${store}</div>
+      <h1>一年一度购物节</h1>
+      <div class="en">THE ANNUAL SHOPPING FESTIVAL</div>
+      <div class="wrap"><div class="archline"></div><div class="arch">
+        <div class="label">全场护肤彩妆</div>
+        <img class="hero" src="../el-67.png">
+        <div class="date">活动时间　${date}</div>
+      </div></div>
+      ${grid}
+      <div class="foot">${info}${qr}</div>
+    </div>`,
+  };
+  document.getElementById('root').innerHTML = T[v];
+</script>
+</body>
+</html>
