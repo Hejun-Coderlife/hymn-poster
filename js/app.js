@@ -7,7 +7,7 @@
 
   const state = {
     store: null,
-    title: A.title, date: A.date, price: A.price, worth: A.worth, bundle: A.bundle,
+    event: A.event, date: A.date, price: A.price, worth: A.worth, bundle: A.bundle,
     item1: { ...A.item1 }, item2: { ...A.item2 }, item3: { ...A.item3 },
     phone: '', address: '',
     img1: null, img2: null,
@@ -44,7 +44,7 @@
   }
   function posterData() {
     const name = state.store ? state.store.name : '';
-    return { ...state, title: state.title.replace(/\{店名\}/g, name) };
+    return { ...state, title: '赫眉' + name + state.event };
   }
 
   // ---------- 门店选择：可搜索（店名 / 拼音 / 首字母 / 区域经理） ----------
@@ -152,7 +152,7 @@
     });
     $('#reset').addEventListener('click', async () => {
       Object.assign(state, {
-        title: A.title, date: A.date, price: A.price, worth: A.worth, bundle: A.bundle,
+        event: A.event, date: A.date, price: A.price, worth: A.worth, bundle: A.bundle,
         item1: { ...A.item1 }, item2: { ...A.item2 }, item3: { ...A.item3 },
         img1: assets.item1, img2: assets.item2,
       });
