@@ -42,5 +42,8 @@ window.PINYIN = {
  "钱清店": "qianqingdian qqd",
  "马渚店": "mazhudian mzd",
  "高塘店": "gaotangdian gtd",
- "龙山店": "longshandian lsd"
+ "龙山店": "longshandian lsd",
+ "官卜妮": "guanboni gbn",
+ "张维": "zhangwei zw",
+ "杜海霞": "duhaixia dhx"
 };

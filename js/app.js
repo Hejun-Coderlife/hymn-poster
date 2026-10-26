@@ -101,7 +101,8 @@
   function matches(s, q) {
     if (!q) return true;
     q = q.toLowerCase().replace(/\s+/g, '');
-    return s.name.includes(q) || s.manager.includes(q) || (PY[s.name] || '').split(' ').some(p => p.includes(q));
+    const py = n => (PY[n] || '').split(' ');
+    return s.name.includes(q) || s.manager.includes(q) || py(s.name).some(p => p.includes(q)) || py(s.manager).some(p => p === q || (q.length >= 3 && p.startsWith(q)));
   }
   function groupsOf() {
     return MANAGERS.concat([...new Set(STORES.map(s => s.manager))].filter(m => !MANAGERS.includes(m)));
@@ -110,6 +111,13 @@
     const q = box.value.trim();
     let html = '';
     hits = [];
+    // 搜的是区域经理：顶部给一行「名下 N 家 · 全选」
+    const mgr = q && groupsOf().find(m => m.includes(q) || (PY[m] || '').split(' ').some(p => p === q.toLowerCase() || (q.length >= 3 && p.startsWith(q.toLowerCase()))));
+    if (mgr) {
+      const n = STORES.filter(s => s.manager === mgr).length;
+      const allOn = STORES.every((s, i) => s.manager !== mgr || selected.includes(i));
+      html += `<li class="bulk mgr"><span><b>${mgr}</b> 名下 ${n} 家</span><button type="button" class="solid" data-grp="${mgr}">${allOn ? '取消全选' : '全选这 ' + n + ' 家'}</button></li>`;
+    }
     if (!q) {
       const all = selected.length === STORES.length;
       html += `<li class="bulk"><span>已选 ${selected.length} / ${STORES.length} 家</span>` +
@@ -117,7 +125,8 @@
         (selected.length ? '<button type="button" data-act="none">清空</button>' : '') + '</li>';
     }
     groupsOf().forEach(m => {
-      const rows = STORES.map((s, i) => [s, i]).filter(([s]) => s.manager === m && matches(s, q));
+      if (mgr && m !== mgr) return; // 搜的是经理：只列她名下的店
+      const rows = STORES.map((s, i) => [s, i]).filter(([s]) => s.manager === m && (mgr || matches(s, q)));
       if (!rows.length) return;
       const allOn = rows.every(([, i]) => selected.includes(i));
       html += `<li class="grp">${m}<span>${rows.length}</span><button type="button" data-grp="${m}">${allOn ? '取消' : '全选'}</button></li>`;

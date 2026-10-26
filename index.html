@@ -82,13 +82,16 @@
   .combo:focus-within input[type=text] { padding-right: 76px; }
   #store-list {
     position: absolute; left: 0; right: 0; top: 47px; z-index: 20; list-style: none;
-    max-height: 420px; overflow-y: auto; background: #fff; border: 1px solid var(--ink);
+    max-height: min(70vh, 640px); overflow-y: auto; background: #fff; border: 1px solid var(--ink);
     -webkit-overflow-scrolling: touch;
   }
   #store-list[hidden] { display: none; }
   #store-list button { border: 0; background: none; color: var(--ink); text-decoration: underline; font-size: 12px; cursor: pointer; padding: 0 4px; }
   #store-list .bulk { display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 12px; color: var(--t3); border-bottom: 1px solid var(--line-2); }
   #store-list .bulk span { flex: 1; }
+  #store-list .bulk.mgr { color: var(--ink); font-size: 13px; padding: 10px 14px; }
+  #store-list .bulk.mgr b { font-weight: 600; }
+  #store-list button.solid { background: var(--ink); color: #fff; text-decoration: none; height: 30px; padding: 0 12px; font-size: 12px; }
   #store-list .grp { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; background: var(--paper); font-size: 11px; color: var(--t3); letter-spacing: var(--track); padding: 4px 10px 4px 14px; border-bottom: 1px solid var(--line); }
   #store-list .grp span { margin-left: 6px; color: var(--t4); flex: 1; }
   #store-list .opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--line); user-select: none; }
@@ -184,7 +187,7 @@
     <h3>选择门店 · 可多选</h3>
     <div class="combo">
       <svg class="mag" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
-      <input type="text" id="store" placeholder="搜店名或拼音，如 横溪 / hx" autocomplete="off" enterkeyhint="search">
+      <input type="text" id="store" placeholder="搜店名、拼音或经理名，如 横溪 / hx / 张维" autocomplete="off" enterkeyhint="search">
       <button class="done" id="store-done" type="button">完成</button>
       <ul id="store-list" hidden></ul>
     </div>
