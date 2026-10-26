@@ -44,7 +44,9 @@
   .card.on canvas { outline: 3px solid var(--ink); outline-offset: 3px; }
   .card figcaption { font-size: 13px; color: var(--t3); margin-top: 8px; text-align: center; }
   .card.on figcaption { color: var(--ink); font-weight: 600; }
-  .card .info { cursor: auto; text-align: left; margin-top: 12px; padding: 12px 14px 14px; border: 1px solid var(--ink); border-top-width: 3px; }
+  .card .info, .card .act { cursor: auto; text-align: left; padding: 12px 14px 14px; border: 1px solid var(--ink); }
+  .card .info { margin-top: 12px; border-top-width: 3px; border-bottom: 0; }
+  .card .act { border-top: 1px solid var(--line-2); }
   .hint-mobile .many, body.multi .hint-mobile .one { display: none; }
   body.multi .hint-mobile .many { display: inline; }
   body:not(.ready) #preview { opacity: .3; }
@@ -274,12 +276,12 @@
   <button class="btn" id="sheet-close">关闭</button>
 </div>
 
-<script src="assets/assets.js?v=202610261154"></script>
-<script src="data/stores.js?v=202610261154"></script>
-<script src="data/pinyin.js?v=202610261154"></script>
-<script src="data/activity.js?v=202610261154"></script>
-<script src="js/poster.js?v=202610261154"></script>
-<script src="data/templates.js?v=202610261154"></script>
-<script src="js/app.js?v=202610261154"></script>
+<script src="assets/assets.js?v=202610261157"></script>
+<script src="data/stores.js?v=202610261157"></script>
+<script src="data/pinyin.js?v=202610261157"></script>
+<script src="data/activity.js?v=202610261157"></script>
+<script src="js/poster.js?v=202610261157"></script>
+<script src="data/templates.js?v=202610261157"></script>
+<script src="js/app.js?v=202610261157"></script>
 </body>
 </html>

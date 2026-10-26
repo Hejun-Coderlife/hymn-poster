@@ -100,17 +100,27 @@
     }
   }
 
-  // 手机多选时，「本店信息」挪到当前那张海报正下方；其余情况放回右侧原位
+  // 手机多选时，「本店信息」和「活动内容」挪到当前那张海报正下方；其余情况放回原位
   const infoSec = $('.info');
-  const infoHome = document.createComment('info');
-  infoSec.parentNode.insertBefore(infoHome, infoSec);
+  const actSec = $('.act');
+  const homes = [infoSec, actSec].map(sec => {
+    const mark = document.createComment('home');
+    sec.parentNode.insertBefore(mark, sec);
+    return [sec, mark];
+  });
   function restoreInfo() {
-    if (infoSec.previousSibling !== infoHome) infoHome.parentNode.insertBefore(infoSec, infoHome.nextSibling);
+    homes.forEach(([sec, mark]) => {
+      if (sec.previousSibling !== mark) mark.parentNode.insertBefore(sec, mark.nextSibling);
+    });
   }
   function placeInfo() {
     const card = selected.length > 1 && matchMedia('(max-width: 860px)').matches && cards.get(cur);
     if (!card) return restoreInfo();
-    if (infoSec.parentNode !== card) card.appendChild(infoSec);
+    // 位置已经对了就别动，否则正在输入的框会失焦
+    if (infoSec.parentNode !== card || actSec.previousSibling !== infoSec) {
+      card.appendChild(infoSec);
+      card.appendChild(actSec);
+    }
   }
   matchMedia('(max-width: 860px)').addEventListener('change', placeInfo);
 
@@ -306,7 +316,7 @@
     // 网格：点一张 = 切到这家编辑；手机上再点已选中的那张 = 看大图
     grid.addEventListener('click', e => {
       const card = e.target.closest('.card');
-      if (!card || e.target.closest('.info')) return; // 在海报下面的信息框里点，不算点海报
+      if (!card || e.target.closest('.info, .act')) return; // 在海报下面的编辑框里点，不算点海报
       const i = +card.dataset.i;
       if (i === cur) { if (isPhone()) enlarge(i); return; }
       setSelected(selected, i);
