@@ -114,32 +114,6 @@
     ctx.drawImage(tintedLogo(img), (S - w) / 2, 31, w, h);
   }
 
-  // ---------- 二维码 ----------
-  function drawQR(ctx, img, caption) {
-    const x = 1016, y = 66, size = 172, pad = 10;
-    ctx.save();
-    ctx.shadowColor = 'rgba(60,0,4,0.35)';
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetY = 6;
-    roundRect(ctx, x, y, size, size, 14);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-    ctx.restore();
-    ctx.save();
-    roundRect(ctx, x + pad, y + pad, size - pad * 2, size - pad * 2, 4);
-    ctx.clip();
-    drawCover(ctx, img, x + pad, y + pad, size - pad * 2, size - pad * 2);
-    ctx.restore();
-    if (caption) {
-      ctx.fillStyle = CREAM;
-      ctx.textAlign = 'center';
-      const sz = fit(ctx, caption, SANS, 24, size + 20, 400);
-      ctx.font = font(sz, SANS, 400);
-      ctx.fillText(caption, x + size / 2, y + size + 34);
-      ctx.textAlign = 'left';
-    }
-  }
-
   // ---------- 主体 ----------
   function draw(canvas, d, assets, scale) {
     canvas.width = canvas.height = S * scale;
@@ -151,13 +125,10 @@
     drawBackground(ctx, assets.bg);
     drawLogo(ctx, assets.logo);
 
-    const hasQR = d.showQR && d.qr;
-    if (hasQR) drawQR(ctx, d.qr, d.qrCaption);
-
     // 标题
     const L = 113;
     const title = d.title;
-    const tMax = (hasQR ? 990 : 1150) - L;
+    const tMax = 1150 - L;
     const tSize = fit(ctx, title, SERIF, 104, tMax, 900, 40);
     ctx.font = font(tSize, SERIF, 900);
     ctx.fillStyle = creamGradient(ctx, 232 - tSize * 0.85, 232);
@@ -166,7 +137,7 @@
     // 领取时间胶囊
     if (d.date) {
       const txt = '领取时间：' + d.date;
-      const size = fit(ctx, txt, SANS, 36, (hasQR ? 990 : 1140) - L - 64, 400);
+      const size = fit(ctx, txt, SANS, 36, 1140 - L - 64, 400);
       ctx.font = font(size, SANS, 400);
       const w = ctx.measureText(txt).width + 64;
       const g = ctx.createLinearGradient(L, 0, L + w, 0);

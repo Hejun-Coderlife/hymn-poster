@@ -8,5 +8,4 @@ window.ACTIVITY = {
   item1: { name: '埃及蓝睡莲面膜3盒', value: '499' },
   item2: { name: '面部紧致护理', value: '198' },
   item3: { name: '抵用券', value: '1000' },
-  qrCaption: '扫码领取',
 };

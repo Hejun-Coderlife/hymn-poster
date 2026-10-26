@@ -3,141 +3,178 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#b30a13">
-<title>赫眉门店海报生成</title>
+<meta name="theme-color" content="#ffffff">
+<title>赫眉 HYMN · 门店海报</title>
 <style>
-  :root { --red: #b30a13; --ink: #2a1a17; --muted: #8a7a72; --line: #eadfd6; --bg: #f7f2ed; }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; }
-  header { display: flex; align-items: baseline; gap: 12px; }
-  header h1 { margin: 0; font-size: 20px; letter-spacing: 1px; }
-  header span { color: var(--muted); font-size: 13px; }
+  /* 界面风格照抖音脚本看板：白底、发丝线分区、直角、无阴影、近黑交互色 */
+  :root {
+    --ink: #16140F; --t2: #4A453C; --t3: #9C958A; --t4: #B4ADA1;
+    --line: #F0EDE6; --line-2: #E3DFD6; --paper: #FAFAF8; --pink: #B9808B;
+    --sans: -apple-system, "SF Pro Text", "PingFang SC", system-ui, sans-serif;
+    --track: .06em;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { background: #fff; }
+  body { color: var(--ink); font: 14px/1.7 var(--sans); -webkit-font-smoothing: antialiased; }
+  button, input { font: inherit; color: inherit; }
+
+  .top { display: flex; align-items: center; gap: 18px; border-bottom: 1px solid var(--line-2); }
+  .top img { height: 22px; display: block; }
+  .top .st { font-size: 11px; letter-spacing: .3em; color: var(--t3); }
+  .pagehead .eyebrow { font-size: 12px; color: var(--t3); letter-spacing: var(--track); }
+  .pagehead h2 { font-size: 22px; font-weight: 500; letter-spacing: .04em; margin-top: 2px; }
+  .pagehead p { font-size: 13px; color: var(--t3); margin-top: 2px; }
 
   main { display: grid; }
   .stage { grid-area: stage; }
   .pick { grid-area: pick; }
   .info { grid-area: info; }
   .act { grid-area: act; }
-  .panel { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 2px 12px rgba(80,20,10,.06); }
-  .panel h2 { margin: 0 0 6px; font-size: 13px; color: var(--muted); font-weight: 500; letter-spacing: 1px; }
+  .sec { border-top: 1px solid var(--line-2); padding-top: 14px; }
+  .sec h3 { font-size: 12px; font-weight: 400; color: var(--t3); letter-spacing: var(--track); margin-bottom: 4px; }
 
-  #preview { width: 100%; aspect-ratio: 1; display: block; border-radius: 10px; box-shadow: 0 10px 40px rgba(80,20,10,.18); background: #a8070f; }
+  #preview { width: 100%; aspect-ratio: 1; display: block; background: #a8070f; }
   body:not(.ready) #preview { opacity: .3; }
-  .loading { text-align: center; color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .loading { text-align: center; color: var(--t3); font-size: 12px; margin-top: 8px; }
   body.ready .loading { display: none; }
 
-  .actions { display: flex; gap: 12px; }
-  button { font: inherit; cursor: pointer; border-radius: 10px; border: 0; padding: 12px 22px; }
-  .primary { background: var(--red); color: #fff; font-weight: 600; }
-  .ghost { background: #fff; color: var(--red); border: 1.5px solid var(--red); font-weight: 600; }
-  body.no-store .actions button { opacity: .45; }
-
-  label { display: block; font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
-  input[type=text], select { width: 100%; font: inherit; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: #fffdfb; color: var(--ink); }
-  input[type=text]:focus, select:focus { outline: 2px solid rgba(179,10,19,.25); border-color: var(--red); }
-  #store { font-size: 17px; font-weight: 600; padding: 12px; border: 1.5px solid var(--red); }
-  .row { display: grid; grid-template-columns: 1fr 96px; gap: 8px; }
+  label { display: block; font-size: 12px; color: var(--t3); letter-spacing: var(--track); margin: 10px 0 4px; }
+  input[type=text] {
+    width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--line-2); border-radius: 0;
+    background: #fff; outline: none; -webkit-appearance: none; appearance: none;
+  }
+  input[type=text]:focus { border-color: var(--ink); }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .item { display: grid; grid-template-columns: 1fr 86px auto; gap: 8px; align-items: end; }
-  .file { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 12px; margin: 0; border: 1px dashed #cdb9ab; border-radius: 8px; font-size: 13px; color: var(--red); cursor: pointer; white-space: nowrap; background: #fffaf6; }
-  .file input { display: none; }
-  .qr-line { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
-  .qr-status { font-size: 13px; color: var(--muted); }
-  .qr-status.ok { color: #2f7d4a; }
-  .qr-status.warn { color: #b26a00; }
-  .check { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--ink); margin: 0; }
-  .note { font-size: 12px; color: #b26a00; margin-top: 4px; }
-  .link { background: none; color: var(--muted); padding: 10px 0 0; font-size: 13px; text-decoration: underline; }
-  details summary { cursor: pointer; font-size: 13px; color: var(--muted); letter-spacing: 1px; list-style: none; }
-  details summary::-webkit-details-marker { display: none; }
-  details summary::before { content: '▸ '; }
-  details[open] summary::before { content: '▾ '; }
+  .note { font-size: 12px; color: var(--pink); margin-top: 4px; }
 
-  #sheet { position: fixed; inset: 0; background: rgba(0,0,0,.86); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 10; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 20px;
+    border: 1px solid var(--ink); background: #fff; color: var(--ink); border-radius: 0; cursor: pointer;
+    font-size: 13px; letter-spacing: var(--track); white-space: nowrap;
+  }
+  .btn.solid { background: var(--ink); color: #fff; }
+  .btn:hover { background: var(--paper); }
+  .btn.solid:hover { background: #2e2b24; }
+  .btn.sm { height: 40px; padding: 0 12px; font-size: 12px; border-color: var(--line-2); }
+  .btn input { display: none; }
+  .actions { display: flex; gap: 10px; }
+  body.no-store .actions .btn { opacity: .4; }
+  .link { background: none; border: 0; color: var(--t3); font-size: 12px; text-decoration: underline; cursor: pointer; margin-top: 12px; }
+
+  /* 选店：搜索框 + 下拉清单 */
+  .combo { position: relative; }
+  .combo input[type=text] { height: 48px; font-size: 16px; padding-left: 38px; padding-right: 40px; border-color: var(--ink); }
+  .combo .mag { position: absolute; left: 13px; top: 15px; width: 17px; height: 17px; color: var(--t3); pointer-events: none; }
+  .combo .clear { position: absolute; right: 0; top: 0; width: 44px; height: 48px; border: 0; background: none; color: var(--t4); font-size: 18px; cursor: pointer; }
+  #store-list {
+    position: absolute; left: 0; right: 0; top: 47px; z-index: 20; list-style: none;
+    max-height: 360px; overflow-y: auto; background: #fff; border: 1px solid var(--ink);
+    -webkit-overflow-scrolling: touch;
+  }
+  #store-list[hidden] { display: none; }
+  #store-list .grp { position: sticky; top: 0; background: var(--paper); font-size: 11px; color: var(--t3); letter-spacing: var(--track); padding: 4px 14px; border-bottom: 1px solid var(--line); }
+  #store-list .grp span { margin-left: 6px; color: var(--t4); }
+  #store-list .opt { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--line); }
+  #store-list .opt:hover, #store-list .opt.kb { background: var(--paper); }
+  #store-list .opt.on { font-weight: 600; }
+  #store-list .opt.on::after { content: '✓'; float: right; color: var(--t3); font-weight: 400; }
+  #store-list .empty { padding: 14px; color: var(--t3); font-size: 13px; }
+  .pick .tip { font-size: 12px; color: var(--t3); margin-top: 6px; }
+
+  details summary { cursor: pointer; font-size: 12px; color: var(--t3); letter-spacing: var(--track); list-style: none; padding: 2px 0; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: ' +'; }
+  details[open] summary::after { content: ' −'; }
+
+  #sheet { position: fixed; inset: 0; background: rgba(22,20,15,.9); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 30; }
   #sheet[hidden] { display: none; }
-  #sheet img { max-width: 100%; max-height: 72vh; border-radius: 6px; -webkit-touch-callout: default; }
-  #sheet p { color: #fff; text-align: center; margin: 14px 0; }
-  #sheet button { background: #fff; color: var(--ink); }
+  #sheet img { max-width: 100%; max-height: 72vh; -webkit-touch-callout: default; }
+  #sheet p { color: #fff; text-align: center; margin: 14px 0; font-size: 13px; }
+  #sheet .btn { background: transparent; color: #fff; border-color: #fff; }
 
   /* ---------- 电脑版：左边大预览，右边表单 ---------- */
   @media (min-width: 861px) {
-    header { padding: 20px 32px 8px; max-width: 1280px; margin: 0 auto; }
+    .top { padding: 20px 40px; }
+    .pagehead { padding: 26px 40px 4px; max-width: 1320px; margin: 0 auto; }
     main {
-      grid-template-columns: minmax(0, 1fr) 380px;
+      grid-template-columns: minmax(0, 1fr) 360px;
       grid-template-rows: auto auto 1fr;
       grid-template-areas: "stage pick" "stage info" "stage act";
-      gap: 16px 28px; padding: 12px 32px 48px; max-width: 1280px; margin: 0 auto; align-items: start;
+      gap: 20px 48px; padding: 18px 40px 56px; max-width: 1320px; margin: 0 auto; align-items: start;
     }
-    .stage { position: sticky; top: 16px; }
-    #preview { max-width: min(800px, calc(100vh - 150px)); margin: 0 auto; }
+    .pick { border-top: 0; padding-top: 0; }
+    .stage { position: sticky; top: 20px; }
+    #preview { max-width: min(780px, calc(100vh - 300px)); margin: 0 auto; border: 1px solid var(--line-2); }
     .actions { justify-content: center; margin-top: 18px; }
-    .actions button { min-width: 150px; }
+    .actions .btn { min-width: 150px; }
     .hint-mobile { display: none; }
   }
 
   /* ---------- 手机版：选店 → 预览 → 信息，下载按钮固定在底部 ---------- */
   @media (max-width: 860px) {
-    header { padding: 14px 16px 2px; flex-wrap: wrap; gap: 2px 10px; }
-    header h1 { font-size: 18px; }
-    header span { font-size: 12px; }
+    .top { padding: 14px 16px; }
+    .top img { height: 19px; }
+    .pagehead { padding: 16px 16px 2px; }
+    .pagehead h2 { font-size: 19px; }
     main {
       grid-template-columns: minmax(0, 1fr);
       grid-template-areas: "pick" "stage" "info" "act";
-      gap: 12px; padding: 10px 12px calc(92px + env(safe-area-inset-bottom));
+      gap: 16px; padding: 12px 16px calc(84px + env(safe-area-inset-bottom));
     }
-    .panel { padding: 14px; }
-    #preview { border-radius: 8px; }
-    .hint-mobile { text-align: center; color: var(--muted); font-size: 12px; margin-top: 6px; }
-    input[type=text], select { font-size: 16px; } /* 防 iPhone 输入时自动放大 */
-    #store { font-size: 18px; padding: 14px 12px; }
+    .pick { border-top: 0; padding-top: 0; }
+    .hint-mobile { text-align: center; color: var(--t3); font-size: 12px; margin-top: 6px; }
+    input[type=text] { font-size: 16px; } /* 防 iPhone 输入时自动放大 */
+    #store-list { max-height: 55vh; }
     .actions {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-      background: rgba(255,255,255,.96); box-shadow: 0 -4px 20px rgba(80,20,10,.1);
-      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      background: #fff; border-top: 1px solid var(--line-2);
     }
-    .actions button { flex: 1; padding: 14px 0; font-size: 16px; }
+    .actions .btn { flex: 1; height: 48px; font-size: 15px; }
     .item { grid-template-columns: 1fr 72px auto; }
   }
 </style>
 </head>
 <body class="no-store">
-<header><h1>赫眉门店海报</h1><span>选门店 → 自动换店名、电话、地址、二维码 → 下载</span></header>
+<div class="top"><img src="assets/logo-ink.png" alt="赫眉 HYMN"><span class="st">POSTER</span></div>
+<header class="pagehead">
+  <div class="eyebrow">赫眉 HYMN · 门店活动</div>
+  <h2>门店海报</h2>
+  <p>选门店，店名、电话、地址自动换好，直接下载</p>
+</header>
 <main>
   <section class="stage">
     <canvas id="preview" width="1254" height="1254"></canvas>
     <div class="loading">字体加载中…</div>
     <div class="hint-mobile">点海报可看大图</div>
     <div class="actions">
-      <button class="primary" id="dl-png">下载图片</button>
-      <button class="ghost" id="dl-pdf">下载 PDF</button>
+      <button class="btn solid" id="dl-png">下载图片</button>
+      <button class="btn" id="dl-pdf">下载 PDF</button>
     </div>
   </section>
 
-  <section class="panel pick">
-    <label for="store" style="margin-top:0">选择门店</label>
-    <select id="store"></select>
+  <section class="sec pick">
+    <h3>选择门店</h3>
+    <div class="combo">
+      <svg class="mag" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
+      <input type="text" id="store" placeholder="搜店名或拼音，如 横溪 / hx" autocomplete="off" enterkeyhint="search">
+      <button class="clear" id="store-clear" type="button" aria-label="清空">×</button>
+      <ul id="store-list" hidden></ul>
+    </div>
+    <div class="tip">也可以点开直接按区域经理找</div>
   </section>
 
-  <section class="panel info">
-    <h2>本店信息（已自动带出，可改）</h2>
+  <section class="sec info">
+    <h3>本店信息 · 已自动带出，可改</h3>
     <label>电话</label>
     <input type="text" id="phone" data-k="phone" inputmode="tel">
     <label>地址</label>
     <input type="text" id="address" data-k="address">
     <div class="note" id="hint-addr" hidden>这家店还没登记地址，请手动填写</div>
-    <label>二维码</label>
-    <div class="qr-line">
-      <span class="qr-status" id="qr-status">先选门店</span>
-      <label class="file">上传/更换<input type="file" id="qr-file" accept="image/*"></label>
-    </div>
-    <div class="row" style="margin-top:8px">
-      <input type="text" data-k="qrCaption" placeholder="二维码下方文字">
-      <label class="check"><input type="checkbox" data-k="showQR">显示</label>
-    </div>
   </section>
 
-  <section class="panel act">
+  <section class="sec act">
     <details>
       <summary>活动内容（一般不用改）</summary>
       <label>标题（{店名} 会自动替换）</label>
@@ -152,18 +189,18 @@
       <label>礼品 1（名称 / 价值 / 图片）</label>
       <div class="item">
         <input type="text" data-k="item1.name"><input type="text" data-k="item1.value">
-        <label class="file">换图<input type="file" id="img1-file" accept="image/*"></label>
+        <label class="btn sm" style="margin:0">换图<input type="file" id="img1-file" accept="image/*"></label>
       </div>
       <label>礼品 2</label>
       <div class="item">
         <input type="text" data-k="item2.name"><input type="text" data-k="item2.value">
-        <label class="file">换图<input type="file" id="img2-file" accept="image/*"></label>
+        <label class="btn sm" style="margin:0">换图<input type="file" id="img2-file" accept="image/*"></label>
       </div>
       <label>礼品 3（券）</label>
       <div class="item" style="grid-template-columns:1fr 86px">
         <input type="text" data-k="item3.name"><input type="text" data-k="item3.value">
       </div>
-      <button class="link" id="reset">恢复总部默认内容</button>
+      <button class="link" id="reset">恢复默认内容</button>
     </details>
   </section>
 </main>
@@ -171,13 +208,13 @@
 <div id="sheet" hidden>
   <img id="sheet-img" alt="">
   <p id="sheet-tip"></p>
-  <button id="sheet-close">关闭</button>
+  <button class="btn" id="sheet-close">关闭</button>
 </div>
 
 <script src="assets/assets.js"></script>
 <script src="data/stores.js"></script>
+<script src="data/pinyin.js"></script>
 <script src="data/activity.js"></script>
-<script src="data/qr.js"></script>
 <script src="js/poster.js"></script>
 <script src="js/app.js"></script>
 </body>

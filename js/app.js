@@ -3,18 +3,15 @@
   const $ = s => document.querySelector(s);
   const A = window.ACTIVITY;
   const STORES = window.STORES;
-  const QR = window.QR || {};
   const MANAGERS = ['官卜妮', '杜海霞', '张维'];
 
   const state = {
     store: null,
     title: A.title, date: A.date, price: A.price, worth: A.worth, bundle: A.bundle,
     item1: { ...A.item1 }, item2: { ...A.item2 }, item3: { ...A.item3 },
-    qrCaption: A.qrCaption, showQR: true,
-    phone: '', address: '', qr: null,
+    phone: '', address: '',
     img1: null, img2: null,
   };
-  const uploadedQR = {}; // 本次手动上传的二维码，按店名记
 
   function loadImage(src) {
     return new Promise((res, rej) => {
@@ -50,46 +47,82 @@
     return { ...state, title: state.title.replace(/\{店名\}/g, name) };
   }
 
-  // ---------- 门店选择 ----------
-  const sel = $('#store');
-  function buildStoreSelect() {
-    sel.innerHTML = '<option value="">— 选择门店 —</option>';
-    const groups = MANAGERS.concat([...new Set(STORES.map(s => s.manager))].filter(m => !MANAGERS.includes(m)));
-    groups.forEach(m => {
-      const og = document.createElement('optgroup');
-      og.label = m + '（' + STORES.filter(s => s.manager === m).length + '家）';
-      STORES.forEach((s, i) => {
-        if (s.manager !== m) return;
-        const o = document.createElement('option');
-        o.value = i;
-        o.textContent = s.name;
-        og.appendChild(o);
-      });
-      sel.appendChild(og);
-    });
+  // ---------- 门店选择：可搜索（店名 / 拼音 / 首字母 / 区域经理） ----------
+  const PY = window.PINYIN || {};
+  const box = $('#store');
+  const list = $('#store-list');
+  let hits = [];      // 当前列表里可选的门店下标
+  let active = -1;    // 键盘高亮第几个
+
+  function matches(s, q) {
+    if (!q) return true;
+    q = q.toLowerCase().replace(/\s+/g, '');
+    return s.name.includes(q) || s.manager.includes(q) || (PY[s.name] || '').replace(' ', '|').split('|').some(p => p.includes(q));
   }
-  async function pickStore(i) {
+  function renderList() {
+    const q = box.value.trim();
+    const groups = MANAGERS.concat([...new Set(STORES.map(s => s.manager))].filter(m => !MANAGERS.includes(m)));
+    let html = '';
+    hits = [];
+    groups.forEach(m => {
+      const rows = STORES.map((s, i) => [s, i]).filter(([s]) => s.manager === m && matches(s, q));
+      if (!rows.length) return;
+      html += `<li class="grp">${m}<span>${rows.length}</span></li>`;
+      rows.forEach(([s, i]) => {
+        html += `<li class="opt${state.store === s ? ' on' : ''}" data-i="${i}" data-n="${hits.length}">${s.name}</li>`;
+        hits.push(i);
+      });
+    });
+    list.innerHTML = html || '<li class="empty">没有找到，换个字试试</li>';
+    active = q && hits.length ? 0 : -1;
+    highlight();
+  }
+  function highlight() {
+    list.querySelectorAll('.opt').forEach(li => li.classList.toggle('kb', +li.dataset.n === active));
+    const el = list.querySelector('.kb');
+    if (el) el.scrollIntoView({ block: 'nearest' });
+  }
+  function openList() { renderList(); list.hidden = false; }
+  function closeList() {
+    list.hidden = true;
+    box.value = state.store ? state.store.name : '';
+  }
+  function choose(i) {
+    box.value = STORES[i].name;
+    list.hidden = true;
+    box.blur();
+    pickStore(i);
+  }
+  function bindStorePicker() {
+    box.addEventListener('focus', () => { box.select(); openList(); });
+    box.addEventListener('input', openList);
+    box.addEventListener('keydown', e => {
+      if (list.hidden && (e.key === 'ArrowDown' || e.key === 'Enter')) { openList(); return; }
+      if (e.key === 'ArrowDown') { active = Math.min(active + 1, hits.length - 1); highlight(); e.preventDefault(); }
+      else if (e.key === 'ArrowUp') { active = Math.max(active - 1, 0); highlight(); e.preventDefault(); }
+      else if (e.key === 'Enter') { if (hits[active] != null) choose(hits[active]); else if (hits.length === 1) choose(hits[0]); e.preventDefault(); }
+      else if (e.key === 'Escape') { closeList(); box.blur(); }
+    });
+    // 用 pointerdown，抢在输入框失焦之前选中
+    list.addEventListener('pointerdown', e => {
+      const li = e.target.closest('.opt');
+      e.preventDefault();
+      if (li) choose(+li.dataset.i);
+    });
+    box.addEventListener('blur', () => setTimeout(closeList, 120));
+    $('#store-clear').addEventListener('click', () => { box.value = ''; box.focus(); });
+  }
+  function pickStore(i) {
     const s = STORES[i];
     state.store = s || null;
     state.phone = s ? s.phone : '';
     state.address = s ? s.address : '';
     $('#phone').value = state.phone;
     $('#address').value = state.address;
-    const src = s && (uploadedQR[s.name] || QR[s.name]);
-    state.qr = src ? await loadImage(src) : null;
-    updateQRStatus();
     if (s) localStorage.setItem('hymn-poster-store', s.name);
     $('#hint-addr').hidden = !(s && !s.address);
     document.body.classList.toggle('no-store', !s);
     render();
-  }
-  function updateQRStatus() {
-    const s = state.store;
-    const el = $('#qr-status');
-    if (!s) { el.textContent = '先选门店'; el.className = 'qr-status'; return; }
-    if (uploadedQR[s.name]) { el.textContent = '用的是刚上传的二维码'; el.className = 'qr-status ok'; }
-    else if (QR[s.name]) { el.textContent = '已自动匹配本店二维码'; el.className = 'qr-status ok'; }
-    else { el.textContent = '本店还没有二维码，可点右边上传'; el.className = 'qr-status warn'; }
   }
 
   // ---------- 表单绑定 ----------
@@ -106,18 +139,8 @@
         el.addEventListener('input', () => { set(el.value.trim()); render(); });
       }
     });
-    sel.addEventListener('change', () => pickStore(sel.value === '' ? -1 : +sel.value));
+    bindStorePicker();
 
-    $('#qr-file').addEventListener('change', async e => {
-      const f = e.target.files[0];
-      e.target.value = '';
-      if (!f || !state.store) return;
-      const url = await fileToDataURL(f);
-      uploadedQR[state.store.name] = url;
-      state.qr = await loadImage(url);
-      updateQRStatus();
-      render();
-    });
     ['img1', 'img2'].forEach(k => {
       $('#' + k + '-file').addEventListener('change', async e => {
         const f = e.target.files[0];
@@ -130,7 +153,7 @@
     $('#reset').addEventListener('click', async () => {
       Object.assign(state, {
         title: A.title, date: A.date, price: A.price, worth: A.worth, bundle: A.bundle,
-        item1: { ...A.item1 }, item2: { ...A.item2 }, item3: { ...A.item3 }, qrCaption: A.qrCaption,
+        item1: { ...A.item1 }, item2: { ...A.item2 }, item3: { ...A.item3 },
         img1: assets.item1, img2: assets.item2,
       });
       document.querySelectorAll('[data-k]').forEach(el => {
@@ -232,7 +255,6 @@
 
   // ---------- 启动 ----------
   (async function init() {
-    buildStoreSelect();
     bind();
     await loadFonts();
     const [logo, item1, item2, bg] = await Promise.all([ASSETS.logo, ASSETS.item1, ASSETS.item2, ASSETS.bg].map(loadImage));
@@ -243,7 +265,7 @@
     const q = new URLSearchParams(location.search).get('store');
     const last = q || localStorage.getItem('hymn-poster-store');
     const i = STORES.findIndex(s => s.name === last);
-    if (i >= 0) sel.value = i;
+    if (i >= 0) box.value = STORES[i].name;
     await pickStore(i);
     document.body.classList.add('ready');
   })();
