@@ -7,8 +7,8 @@
 - 门店数据 data/stores.js 由 tools/build_data.js 从 hymn-site 官网列表 + 抖音看板 43 店档案生成；电话用官网的对外电话。三横店官网没地址。
 - 活动文案：data/activity.js（总部改这里）。
 - 字体（照原图核对过）：标题/数字=思源宋体 Noto Serif SC Black，小字=思源黑体 Noto Sans SC Regular，GB2312一级子集，OFL；原文件和 venv 在 fonts-src/（已 gitignore），改字体后跑 python3 tools/build_assets.py。
-- 链接带 ?store=横溪店 可直接选好门店。选店框可搜店名/拼音/首字母/区域经理(data/pinyin.js 由 tools/build_pinyin.py 生成，增删店后重跑)。
-- 标题 = 赫眉 + 店名 + activity.event(默认「周年庆」)，用户嫌 {店名} 占位符多余，别再加回来。
+- 支持多店同时选择：多家时图片打 ZIP(每店一张 JPG)、PDF 合成多页(每店一页)；JSZip 在 vendor/。链接 ?store=横溪店,姜山店 可预选多家。选店框可搜店名/拼音/首字母/区域经理(data/pinyin.js 由 tools/build_pinyin.py 生成，增删店后重跑)。
+- 标题框显示整行标题(和海报一致，可直接改)，默认 赫眉+店名+activity.event；换店只替换标题里的旧店名。不要用 {店名} 占位符，也不要只给个"活动名"框(两种都被否过)。
 - 界面风格照抖音看板(白底/发丝线/直角/无阴影/近黑按钮)；页面上不要出现「总部」二字。
 - 背景 source/bg.png、面膜图 source/mask.png 是用户给的；logo 用 flip-clock 的白色原件 logo-hymn.png（保持白色）。
 - 同一个 index.html 两套布局：>860px 电脑版(左预览右表单)，≤860px 手机版(选店→预览→信息，下载按钮固定底部，点预览看大图可长按保存)。
