@@ -52,13 +52,43 @@
   const preview = $('#preview');
   let assets;
   let queued = false;
+  const grid = $('#grid');
+  const cards = new Map();  // 门店下标 → 网格里的那张卡片
+  let gen = 0;              // 每次重画加 1，旧的分批任务看到就停
   function render() {
     if (queued || !assets) return;
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
-      Poster.draw(preview, posterData(cur), assets, 1);
+      const multi = selected.length > 1;
+      document.body.classList.toggle('multi', multi);
+      if (!multi) { Poster.draw(preview, posterData(cur), assets, 1); return; }
+      renderGrid();
     });
+  }
+  // 多选：每家一张，按勾选顺序排；分批画，免得一次画几十张卡住页面
+  async function renderGrid() {
+    const my = ++gen;
+    for (const [i, el] of cards) if (!selected.includes(i)) { el.remove(); cards.delete(i); }
+    selected.forEach(i => {
+      let el = cards.get(i);
+      if (!el) {
+        el = document.createElement('figure');
+        el.className = 'card';
+        el.dataset.i = i;
+        el.innerHTML = `<canvas></canvas><figcaption>${STORES[i].name}</figcaption>`;
+        cards.set(i, el);
+      }
+      el.classList.toggle('on', i === cur);
+      grid.appendChild(el); // 按顺序重新排
+    });
+    // 先画正在编辑的那张，其余随后
+    const order = [cur].concat(selected.filter(i => i !== cur));
+    for (let k = 0; k < order.length; k++) {
+      if (my !== gen) return;
+      Poster.draw(cards.get(order[k]).querySelector('canvas'), posterData(order[k]), assets, 0.5);
+      if (k % 4 === 3) await new Promise(r => setTimeout(r, 0));
+    }
   }
 
   // ---------- 门店选择：可搜索、可多选 ----------
@@ -183,7 +213,7 @@
     $('#address').value = info.address;
     $('#info-name').textContent = cur >= 0 ? ' · ' + STORES[cur].name : '';
     $('#hint-addr').hidden = !(cur >= 0 && !info.address);
-    $('#dl-png').textContent = n > 1 ? `下载 ${n} 张图片（ZIP）` : '下载图片';
+    $('#dl-png').textContent = n > 1 ? `下载 ${n} 张图片` : '下载图片';
     $('#dl-pdf').textContent = n > 1 ? `下载 PDF（${n} 页）` : '下载 PDF';
     document.body.classList.toggle('no-store', !n);
     render();
@@ -233,11 +263,22 @@
     $('#dl-pdf').addEventListener('click', () => exportFile('pdf'));
     $('#sheet-close').addEventListener('click', () => { $('#sheet').hidden = true; });
     // 手机上点预览看大图（也能长按保存）
-    preview.addEventListener('click', () => {
-      if (!matchMedia('(max-width: 860px)').matches || !assets || cur < 0) return;
+    const isPhone = () => matchMedia('(max-width: 860px)').matches;
+    const enlarge = i => {
       const c = document.createElement('canvas');
-      Poster.draw(c, posterData(cur), assets, EXPORT_SCALE);
+      Poster.draw(c, posterData(i), assets, EXPORT_SCALE);
       showSheet(c.toDataURL('image/jpeg', 0.92), '长按图片可保存');
+    };
+    preview.addEventListener('click', () => {
+      if (isPhone() && assets && cur >= 0) enlarge(cur);
+    });
+    // 网格：点一张 = 切到这家编辑；手机上再点已选中的那张 = 看大图
+    grid.addEventListener('click', e => {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      const i = +card.dataset.i;
+      if (i === cur) { if (isPhone()) enlarge(i); return; }
+      setSelected(selected, i);
     });
   }
 
@@ -283,25 +324,21 @@
         }
         return;
       }
-      // 多家：一家一家画，画完立刻转成 JPEG，省内存
-      const zip = type === 'png' ? new JSZip() : null;
+      // 多家：一家一家画。图片每家单独下载一张原图 PNG（不打包、不压缩）；PDF 合成多页
       const pages = [];
       for (let k = 0; k < selected.length; k++) {
         btn.textContent = `生成中 ${k + 1} / ${selected.length}…`;
         await tick();
         const i = selected[k];
         Poster.draw(c, posterData(i), assets, EXPORT_SCALE);
-        const blob = await toBlob(c, 'image/jpeg', type === 'png' ? 0.92 : 0.9);
-        if (zip) zip.file(`赫眉${STORES[i].name}-海报.jpg`, blob);
-        else pages.push({ jpg: new Uint8Array(await blob.arrayBuffer()), w: c.width, h: c.height });
+        if (type === 'png') {
+          deliver(await toBlob(c, 'image/png'), `赫眉${STORES[i].name}-海报.png`);
+          await new Promise(r => setTimeout(r, 400)); // 连续下载要留点间隔，浏览器才不会吞掉
+        } else {
+          pages.push({ jpg: new Uint8Array(await (await toBlob(c, 'image/jpeg', 0.95)).arrayBuffer()), w: c.width, h: c.height });
+        }
       }
-      const name = `赫眉海报-${selected.length}家店`;
-      if (zip) {
-        btn.textContent = '打包中…';
-        deliver(await zip.generateAsync({ type: 'blob' }), name + '.zip');
-      } else {
-        deliver(makePDF(pages), name + '.pdf');
-      }
+      if (type === 'pdf') deliver(makePDF(pages), `赫眉海报-${selected.length}家店.pdf`);
     } finally {
       busy = false;
       btn.textContent = label;

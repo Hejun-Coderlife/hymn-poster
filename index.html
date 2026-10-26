@@ -34,6 +34,17 @@
   .sec h3 { font-size: 12px; font-weight: 400; color: var(--t3); letter-spacing: var(--track); margin-bottom: 4px; }
 
   #preview { width: 100%; aspect-ratio: 1; display: block; background: #a8070f; }
+  /* 多选：所有海报排成网格 */
+  .grid { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  body.multi #preview { display: none; }
+  body.multi .grid { display: grid; }
+  .card { cursor: pointer; }
+  .card canvas { width: 100%; aspect-ratio: 1; display: block; background: #a8070f; outline: 1px solid var(--line-2); outline-offset: 0; }
+  .card.on canvas { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .card figcaption { font-size: 13px; color: var(--t3); margin-top: 8px; text-align: center; }
+  .card.on figcaption { color: var(--ink); font-weight: 600; }
+  .hint-mobile .many, body.multi .hint-mobile .one { display: none; }
+  body.multi .hint-mobile .many { display: inline; }
   body:not(.ready) #preview { opacity: .3; }
   .loading { text-align: center; color: var(--t3); font-size: 12px; margin-top: 8px; }
   body.ready .loading { display: none; }
@@ -116,6 +127,9 @@
     }
     .pick { border-top: 0; padding-top: 0; }
     .stage { position: sticky; top: 20px; }
+    body.multi .stage { position: static; }
+    body.multi .actions { position: sticky; bottom: 0; background: #fff; padding: 14px 0; margin-top: 8px; border-top: 1px solid var(--line-2); }
+    body.multi .pick, body.multi .info { position: relative; }
     #preview { max-width: min(780px, calc(100vh - 300px)); margin: 0 auto; border: 1px solid var(--line-2); }
     .actions { justify-content: center; margin-top: 18px; }
     .actions .btn { min-width: 150px; }
@@ -157,8 +171,9 @@
 <main>
   <section class="stage">
     <canvas id="preview" width="1254" height="1254"></canvas>
+    <div class="grid" id="grid"></div>
     <div class="loading">字体加载中…</div>
-    <div class="hint-mobile">点海报可看大图</div>
+    <div class="hint-mobile"><span class="one">点海报可看大图</span><span class="many">点一张切换编辑，再点一次看大图</span></div>
     <div class="actions">
       <button class="btn solid" id="dl-png">下载图片</button>
       <button class="btn" id="dl-pdf">下载 PDF</button>
@@ -223,7 +238,6 @@
   <button class="btn" id="sheet-close">关闭</button>
 </div>
 
-<script src="vendor/jszip.min.js"></script>
 <script src="assets/assets.js"></script>
 <script src="data/stores.js"></script>
 <script src="data/pinyin.js"></script>
