@@ -14,6 +14,7 @@
   };
   let selected = [];        // 已勾选的门店下标（按勾选顺序）
   let cur = -1;             // 正在预览 / 编辑的那家
+  let titleStore = -1;      // 标题文字里现在写的是哪家店（-1 = 还没写店名）。全部取消勾选时标题不动，下次只做替换，不会叠加
   const overrides = {};     // 手动改过的电话地址：店名 → { phone, address }
 
   function loadImage(src) {
@@ -47,7 +48,7 @@
   }
   function posterData(i) {
     if (i < 0) return { ...state, phone: '', address: '' };
-    return { ...state, ...infoOf(i), title: i === cur ? state.title : swapTitle(state.title, cur, i) };
+    return { ...state, ...infoOf(i), title: i === titleStore ? state.title : swapTitle(state.title, titleStore, i) };
   }
 
   // ---------- 预览 ----------
@@ -64,7 +65,8 @@
       queued = false;
       const multi = selected.length > 1;
       document.body.classList.toggle('multi', multi);
-      if (!multi) { tpl.draw(preview, posterData(cur), assets, 1); return; }
+      tpl.draw(preview, posterData(cur), assets, 1); // 单选 / 电脑多选时的大图
+      if (!multi) return;
       renderGrid();
     });
   }
@@ -150,12 +152,12 @@
   function closeList() { list.hidden = true; box.value = ''; }
 
   function setSelected(next, focus) {
-    const prev = cur;
     selected = next;
     if (focus != null && selected.includes(focus)) cur = focus;
     else if (!selected.includes(cur)) cur = selected.length ? selected[0] : -1;
-    if (cur !== prev && cur >= 0) {
-      state.title = swapTitle(state.title, prev, cur);
+    if (cur >= 0 && cur !== titleStore) {
+      state.title = swapTitle(state.title, titleStore, cur);
+      titleStore = cur;
       $('#title').value = state.title;
     }
     localStorage.setItem('hymn-poster-stores', selected.map(i => STORES[i].name).join(','));
@@ -260,6 +262,7 @@
     });
     $('#reset').addEventListener('click', () => {
       Object.assign(state, tpl.defaults(assets), { title: '赫眉' + (cur >= 0 ? STORES[cur].name : '') + A.event });
+      titleStore = cur;
       fillForm();
       render();
     });
@@ -433,7 +436,8 @@
     if (t !== tpl) {
       tpl = t;
       Object.assign(state, tpl.defaults(assets));
-      if (cur >= 0) state.title = swapTitle(state.title, -1, cur);
+      titleStore = -1;
+      if (cur >= 0) { state.title = swapTitle(state.title, -1, cur); titleStore = cur; }
       fillForm();
     }
     $('#tpl-name').textContent = tpl.name;

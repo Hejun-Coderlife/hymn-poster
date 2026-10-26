@@ -35,9 +35,10 @@
 
   #preview { width: 100%; aspect-ratio: 1; display: block; background: #a8070f; }
   /* 多选：所有海报排成网格 */
-  .grid { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  /* 多选：手机上从上往下一张张排；电脑上左边小图列 + 右边大图（见下面电脑版） */
+  .grid { display: none; flex-direction: column; gap: 22px; }
   body.multi #preview { display: none; }
-  body.multi .grid { display: grid; }
+  body.multi .grid { display: flex; }
   .card { cursor: pointer; }
   .card canvas { width: 100%; aspect-ratio: 1; display: block; background: #a8070f; outline: 1px solid var(--line-2); outline-offset: 0; }
   .card.on canvas { outline: 3px solid var(--ink); outline-offset: 3px; }
@@ -144,10 +145,14 @@
     }
     .pick { border-top: 0; padding-top: 0; }
     .stage { position: sticky; top: 20px; }
-    body.multi .stage { position: static; }
-    body.multi .actions { position: sticky; bottom: 0; background: #fff; padding: 14px 0; margin-top: 8px; border-top: 1px solid var(--line-2); }
-    body.multi .pick, body.multi .info { position: relative; }
-    #preview { max-width: min(780px, calc(100vh - 300px)); margin: 0 auto; border: 1px solid var(--line-2); }
+    :root { --pv: min(780px, calc(100vh - 260px)); }
+    #preview { max-width: var(--pv); margin: 0 auto; border: 1px solid var(--line-2); }
+    .view { display: flex; justify-content: center; gap: 18px; align-items: flex-start; min-width: 0; }
+    body.multi #preview { display: block; flex: 0 1 var(--pv); min-width: 0; width: auto; margin: 0; }
+    body.multi .grid { flex: none; width: 116px; max-height: var(--pv); overflow-y: auto; gap: 14px; padding: 4px 6px 4px 4px; }
+    body.multi .card figcaption { font-size: 11px; margin-top: 4px; }
+    body.multi .card canvas { outline-width: 1px; }
+    body.multi .card.on canvas { outline: 2px solid var(--ink); outline-offset: 2px; }
     .actions { justify-content: center; margin-top: 18px; }
     .actions .btn { min-width: 150px; }
     .hint-mobile { display: none; }
@@ -198,8 +203,10 @@
 </header>
 <main class="e-only">
   <section class="stage">
-    <canvas id="preview" width="1254" height="1254"></canvas>
-    <div class="grid" id="grid"></div>
+    <div class="view">
+      <div class="grid" id="grid"></div>
+      <canvas id="preview" width="1254" height="1254"></canvas>
+    </div>
     <div class="loading">字体加载中…</div>
     <div class="hint-mobile"><span class="one">点海报可看大图</span><span class="many">点一张切换编辑，再点一次看大图</span></div>
     <div class="actions">
