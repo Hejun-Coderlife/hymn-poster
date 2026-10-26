@@ -3,6 +3,8 @@
   const $ = s => document.querySelector(s);
   const A = window.ACTIVITY;
   const STORES = window.STORES;
+  const TEMPLATES = window.TEMPLATES;
+  let tpl = TEMPLATES[0];   // 当前编辑的海报模板
   const MANAGERS = ['官卜妮', '杜海霞', '张维'];
 
   const state = {
@@ -62,7 +64,7 @@
       queued = false;
       const multi = selected.length > 1;
       document.body.classList.toggle('multi', multi);
-      if (!multi) { Poster.draw(preview, posterData(cur), assets, 1); return; }
+      if (!multi) { tpl.draw(preview, posterData(cur), assets, 1); return; }
       renderGrid();
     });
   }
@@ -86,7 +88,7 @@
     const order = [cur].concat(selected.filter(i => i !== cur));
     for (let k = 0; k < order.length; k++) {
       if (my !== gen) return;
-      Poster.draw(cards.get(order[k]).querySelector('canvas'), posterData(order[k]), assets, 0.5);
+      tpl.draw(cards.get(order[k]).querySelector('canvas'), posterData(order[k]), assets, 0.5);
       if (k % 4 === 3) await new Promise(r => setTimeout(r, 0));
     }
   }
@@ -257,14 +259,8 @@
       });
     });
     $('#reset').addEventListener('click', () => {
-      Object.assign(state, {
-        title: '赫眉' + (cur >= 0 ? STORES[cur].name : '') + A.event, date: A.date, price: A.price, worth: A.worth, bundle: A.bundle,
-        item1: { ...A.item1 }, item2: { ...A.item2 }, item3: { ...A.item3 },
-        img1: assets.item1, img2: assets.item2,
-      });
-      document.querySelectorAll('[data-k]').forEach(el => {
-        el.value = el.dataset.k.split('.').reduce((o, k) => o[k], state);
-      });
+      Object.assign(state, tpl.defaults(assets), { title: '赫眉' + (cur >= 0 ? STORES[cur].name : '') + A.event });
+      fillForm();
       render();
     });
 
@@ -275,7 +271,7 @@
     const isPhone = () => matchMedia('(max-width: 860px)').matches;
     const enlarge = i => {
       const c = document.createElement('canvas');
-      Poster.draw(c, posterData(i), assets, EXPORT_SCALE);
+      tpl.draw(c, posterData(i), assets, EXPORT_SCALE);
       showSheet(c.toDataURL('image/jpeg', 0.92), '长按图片可保存');
     };
     preview.addEventListener('click', () => {
@@ -288,6 +284,12 @@
       const i = +card.dataset.i;
       if (i === cur) { if (isPhone()) enlarge(i); return; }
       setSelected(selected, i);
+    });
+  }
+
+  function fillForm() {
+    document.querySelectorAll('[data-k]').forEach(el => {
+      el.value = el.dataset.k.split('.').reduce((o, k) => o[k], state);
     });
   }
 
@@ -323,7 +325,7 @@
     const c = document.createElement('canvas');
     try {
       if (!many) {
-        Poster.draw(c, posterData(cur), assets, EXPORT_SCALE);
+        tpl.draw(c, posterData(cur), assets, EXPORT_SCALE);
         const base = '赫眉' + STORES[cur].name + '-海报';
         if (type === 'png') {
           deliver(await toBlob(c, 'image/png'), base + '.png', c.toDataURL('image/jpeg', 0.92));
@@ -339,7 +341,7 @@
         btn.textContent = `生成中 ${k + 1} / ${selected.length}…`;
         await tick();
         const i = selected[k];
-        Poster.draw(c, posterData(i), assets, EXPORT_SCALE);
+        tpl.draw(c, posterData(i), assets, EXPORT_SCALE);
         if (type === 'png') {
           deliver(await toBlob(c, 'image/png'), `赫眉${STORES[i].name}-海报.png`);
           await new Promise(r => setTimeout(r, 400)); // 连续下载要留点间隔，浏览器才不会吞掉
@@ -405,19 +407,62 @@
     return new Blob(parts, { type: 'application/pdf' });
   }
 
+  // ---------- 首页：海报模板列表 ----------
+  function storeFromURL() {
+    const q = new URLSearchParams(location.search).get('store');
+    return q ? '&store=' + encodeURIComponent(q) : '';
+  }
+  function renderGallery() {
+    const sample = STORES.findIndex(s => s.name === '横溪店');
+    const info = sample >= 0 ? infoOf(sample) : { phone: '', address: '' };
+    $('#tpl-list').innerHTML = TEMPLATES.map(t =>
+      `<a class="tpl" href="?t=${t.id}${storeFromURL()}" data-t="${t.id}"><canvas></canvas><div class="nm">${t.name}</div><div class="go">使用这个海报 →</div></a>`).join('');
+    TEMPLATES.forEach((t, k) => {
+      const d = { ...t.defaults(assets), ...info };
+      d.title = d.title.replace(/^赫眉/, '赫眉' + (sample >= 0 ? STORES[sample].name : ''));
+      t.draw($('#tpl-list').children[k].querySelector('canvas'), d, assets, 0.5);
+    });
+  }
+  // 链接里有 ?t=模板 就进编辑页，没有就是首页
+  function route() {
+    const t = TEMPLATES.find(x => x.id === new URLSearchParams(location.search).get('t'));
+    document.body.classList.toggle('view-gallery', !t);
+    document.body.classList.toggle('view-editor', !!t);
+    window.scrollTo(0, 0);
+    if (!t) { renderGallery(); return; }
+    if (t !== tpl) {
+      tpl = t;
+      Object.assign(state, tpl.defaults(assets));
+      if (cur >= 0) state.title = swapTitle(state.title, -1, cur);
+      fillForm();
+    }
+    $('#tpl-name').textContent = tpl.name;
+    render();
+  }
+
   // ---------- 启动 ----------
   (async function init() {
     bind();
     await loadFonts();
     const [logo, item1, item2, bg] = await Promise.all([ASSETS.logo, ASSETS.item1, ASSETS.item2, ASSETS.bg].map(loadImage));
     assets = { logo, item1, item2, bg };
-    state.img1 = item1;
-    state.img2 = item2;
+    Object.assign(state, tpl.defaults(assets));
+    fillForm();
     // 链接里带 ?store=横溪店（多家用逗号隔开）就直接选好；否则用上次选的
     const q = new URLSearchParams(location.search).get('store');
     const names = (q || localStorage.getItem('hymn-poster-stores') || localStorage.getItem('hymn-poster-store') || '').split(/[,，、]/);
     const pre = names.map(n => STORES.findIndex(s => s.name === n.trim())).filter(i => i >= 0);
     setSelected([...new Set(pre)]);
+    // 首页点模板 / 编辑页点返回：不刷新页面，直接切
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a.tpl, a.back');
+      if (!a || e.metaKey || e.ctrlKey) return;
+      e.preventDefault();
+      history.pushState(null, '', a.getAttribute('href'));
+      route();
+    });
+    window.addEventListener('popstate', route);
+    route();
     document.body.classList.add('ready');
   })();
 })();
