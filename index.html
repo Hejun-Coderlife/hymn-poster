@@ -3,28 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#b30a13">
 <title>赫眉门店海报生成</title>
 <style>
   :root { --red: #b30a13; --ink: #2a1a17; --muted: #8a7a72; --line: #eadfd6; --bg: #f7f2ed; }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; }
-  header { padding: 18px 24px 6px; display: flex; align-items: baseline; gap: 12px; }
+  header { display: flex; align-items: baseline; gap: 12px; }
   header h1 { margin: 0; font-size: 20px; letter-spacing: 1px; }
   header span { color: var(--muted); font-size: 13px; }
-  main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; padding: 12px 24px 40px; max-width: 1240px; margin: 0 auto; }
-  .stage { position: sticky; top: 16px; align-self: start; }
-  #preview { width: 100%; max-width: 760px; aspect-ratio: 1; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 0 10px 40px rgba(80,20,10,.18); background: #b30a13; }
+
+  main { display: grid; }
+  .stage { grid-area: stage; }
+  .pick { grid-area: pick; }
+  .info { grid-area: info; }
+  .act { grid-area: act; }
+  .panel { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 2px 12px rgba(80,20,10,.06); }
+  .panel h2 { margin: 0 0 6px; font-size: 13px; color: var(--muted); font-weight: 500; letter-spacing: 1px; }
+
+  #preview { width: 100%; aspect-ratio: 1; display: block; border-radius: 10px; box-shadow: 0 10px 40px rgba(80,20,10,.18); background: #a8070f; }
   body:not(.ready) #preview { opacity: .3; }
-  .actions { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
+  .loading { text-align: center; color: var(--muted); font-size: 13px; margin-top: 8px; }
+  body.ready .loading { display: none; }
+
+  .actions { display: flex; gap: 12px; }
   button { font: inherit; cursor: pointer; border-radius: 10px; border: 0; padding: 12px 22px; }
   .primary { background: var(--red); color: #fff; font-weight: 600; }
   .ghost { background: #fff; color: var(--red); border: 1.5px solid var(--red); font-weight: 600; }
   body.no-store .actions button { opacity: .45; }
 
-  aside { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 2px 12px rgba(80,20,10,.06); }
-  .group { padding: 14px 0; border-top: 1px solid var(--line); }
-  .group:first-child { border-top: 0; padding-top: 0; }
-  .group h2 { margin: 0 0 10px; font-size: 13px; color: var(--muted); font-weight: 500; letter-spacing: 1px; }
   label { display: block; font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
   input[type=text], select { width: 100%; font: inherit; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: #fffdfb; color: var(--ink); }
   input[type=text]:focus, select:focus { outline: 2px solid rgba(179,10,19,.25); border-color: var(--red); }
@@ -32,7 +39,7 @@
   .row { display: grid; grid-template-columns: 1fr 96px; gap: 8px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .item { display: grid; grid-template-columns: 1fr 86px auto; gap: 8px; align-items: end; }
-  .file { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 12px; border: 1px dashed #cdb9ab; border-radius: 8px; font-size: 13px; color: var(--red); cursor: pointer; white-space: nowrap; background: #fffaf6; }
+  .file { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 12px; margin: 0; border: 1px dashed #cdb9ab; border-radius: 8px; font-size: 13px; color: var(--red); cursor: pointer; white-space: nowrap; background: #fffaf6; }
   .file input { display: none; }
   .qr-line { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
   .qr-status { font-size: 13px; color: var(--muted); }
@@ -40,24 +47,57 @@
   .qr-status.warn { color: #b26a00; }
   .check { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--ink); margin: 0; }
   .note { font-size: 12px; color: #b26a00; margin-top: 4px; }
-  .tip { font-size: 12px; color: var(--muted); }
-  .link { background: none; color: var(--muted); padding: 4px 0; font-size: 13px; text-decoration: underline; }
+  .link { background: none; color: var(--muted); padding: 10px 0 0; font-size: 13px; text-decoration: underline; }
   details summary { cursor: pointer; font-size: 13px; color: var(--muted); letter-spacing: 1px; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
   details summary::before { content: '▸ '; }
   details[open] summary::before { content: '▾ '; }
 
-  #sheet { position: fixed; inset: 0; background: rgba(0,0,0,.82); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 10; }
+  #sheet { position: fixed; inset: 0; background: rgba(0,0,0,.86); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 10; }
   #sheet[hidden] { display: none; }
-  #sheet img { max-width: 100%; max-height: 72vh; border-radius: 6px; }
+  #sheet img { max-width: 100%; max-height: 72vh; border-radius: 6px; -webkit-touch-callout: default; }
   #sheet p { color: #fff; text-align: center; margin: 14px 0; }
   #sheet button { background: #fff; color: var(--ink); }
 
+  /* ---------- 电脑版：左边大预览，右边表单 ---------- */
+  @media (min-width: 861px) {
+    header { padding: 20px 32px 8px; max-width: 1280px; margin: 0 auto; }
+    main {
+      grid-template-columns: minmax(0, 1fr) 380px;
+      grid-template-rows: auto auto 1fr;
+      grid-template-areas: "stage pick" "stage info" "stage act";
+      gap: 16px 28px; padding: 12px 32px 48px; max-width: 1280px; margin: 0 auto; align-items: start;
+    }
+    .stage { position: sticky; top: 16px; }
+    #preview { max-width: min(800px, calc(100vh - 150px)); margin: 0 auto; }
+    .actions { justify-content: center; margin-top: 18px; }
+    .actions button { min-width: 150px; }
+    .hint-mobile { display: none; }
+  }
+
+  /* ---------- 手机版：选店 → 预览 → 信息，下载按钮固定在底部 ---------- */
   @media (max-width: 860px) {
-    header { padding: 14px 16px 4px; flex-wrap: wrap; gap: 4px 12px; }
-    main { grid-template-columns: minmax(0, 1fr); padding: 8px 12px 32px; gap: 16px; }
-    .stage { position: static; }
-    aside { order: -1; }
-    aside .more { display: none; }
+    header { padding: 14px 16px 2px; flex-wrap: wrap; gap: 2px 10px; }
+    header h1 { font-size: 18px; }
+    header span { font-size: 12px; }
+    main {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "pick" "stage" "info" "act";
+      gap: 12px; padding: 10px 12px calc(92px + env(safe-area-inset-bottom));
+    }
+    .panel { padding: 14px; }
+    #preview { border-radius: 8px; }
+    .hint-mobile { text-align: center; color: var(--muted); font-size: 12px; margin-top: 6px; }
+    input[type=text], select { font-size: 16px; } /* 防 iPhone 输入时自动放大 */
+    #store { font-size: 18px; padding: 14px 12px; }
+    .actions {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(255,255,255,.96); box-shadow: 0 -4px 20px rgba(80,20,10,.1);
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    }
+    .actions button { flex: 1; padding: 14px 0; font-size: 16px; }
+    .item { grid-template-columns: 1fr 72px auto; }
   }
 </style>
 </head>
@@ -66,66 +106,66 @@
 <main>
   <section class="stage">
     <canvas id="preview" width="1254" height="1254"></canvas>
+    <div class="loading">字体加载中…</div>
+    <div class="hint-mobile">点海报可看大图</div>
     <div class="actions">
       <button class="primary" id="dl-png">下载图片</button>
       <button class="ghost" id="dl-pdf">下载 PDF</button>
     </div>
   </section>
 
-  <aside>
-    <div class="group">
-      <label for="store" style="margin-top:0">选择门店</label>
-      <select id="store"></select>
-    </div>
+  <section class="panel pick">
+    <label for="store" style="margin-top:0">选择门店</label>
+    <select id="store"></select>
+  </section>
 
-    <div class="group">
-      <h2>本店信息（已自动带出，可改）</h2>
-      <label>电话</label>
-      <input type="text" id="phone" data-k="phone" inputmode="tel">
-      <label>地址</label>
-      <input type="text" id="address" data-k="address">
-      <div class="note" id="hint-addr" hidden>这家店还没登记地址，请手动填写</div>
-      <label>二维码</label>
-      <div class="qr-line">
-        <span class="qr-status" id="qr-status">先选门店</span>
-        <label class="file">上传/更换<input type="file" id="qr-file" accept="image/*"></label>
-      </div>
-      <div class="row" style="margin-top:6px">
-        <input type="text" data-k="qrCaption" placeholder="二维码下方文字">
-        <label class="check"><input type="checkbox" data-k="showQR">显示</label>
-      </div>
+  <section class="panel info">
+    <h2>本店信息（已自动带出，可改）</h2>
+    <label>电话</label>
+    <input type="text" id="phone" data-k="phone" inputmode="tel">
+    <label>地址</label>
+    <input type="text" id="address" data-k="address">
+    <div class="note" id="hint-addr" hidden>这家店还没登记地址，请手动填写</div>
+    <label>二维码</label>
+    <div class="qr-line">
+      <span class="qr-status" id="qr-status">先选门店</span>
+      <label class="file">上传/更换<input type="file" id="qr-file" accept="image/*"></label>
     </div>
+    <div class="row" style="margin-top:8px">
+      <input type="text" data-k="qrCaption" placeholder="二维码下方文字">
+      <label class="check"><input type="checkbox" data-k="showQR">显示</label>
+    </div>
+  </section>
 
-    <div class="group">
-      <details>
-        <summary>活动内容（一般不用改）</summary>
-        <label>标题（{店名} 会自动替换）</label>
-        <input type="text" data-k="title">
-        <label>领取时间</label>
-        <input type="text" data-k="date">
-        <div class="row3">
-          <div><label>大字价格</label><input type="text" data-k="price"></div>
-          <div><label>礼包价值</label><input type="text" data-k="worth"></div>
-          <div><label>礼包名</label><input type="text" data-k="bundle"></div>
-        </div>
-        <label>礼品 1（名称 / 价值 / 图片）</label>
-        <div class="item">
-          <input type="text" data-k="item1.name"><input type="text" data-k="item1.value">
-          <label class="file">换图<input type="file" id="img1-file" accept="image/*"></label>
-        </div>
-        <label>礼品 2</label>
-        <div class="item">
-          <input type="text" data-k="item2.name"><input type="text" data-k="item2.value">
-          <label class="file">换图<input type="file" id="img2-file" accept="image/*"></label>
-        </div>
-        <label>礼品 3（券）</label>
-        <div class="item" style="grid-template-columns:1fr 86px">
-          <input type="text" data-k="item3.name"><input type="text" data-k="item3.value">
-        </div>
-        <button class="link" id="reset">恢复总部默认内容</button>
-      </details>
-    </div>
-  </aside>
+  <section class="panel act">
+    <details>
+      <summary>活动内容（一般不用改）</summary>
+      <label>标题（{店名} 会自动替换）</label>
+      <input type="text" data-k="title">
+      <label>领取时间</label>
+      <input type="text" data-k="date">
+      <div class="row3">
+        <div><label>大字价格</label><input type="text" data-k="price"></div>
+        <div><label>礼包价值</label><input type="text" data-k="worth"></div>
+        <div><label>礼包名</label><input type="text" data-k="bundle"></div>
+      </div>
+      <label>礼品 1（名称 / 价值 / 图片）</label>
+      <div class="item">
+        <input type="text" data-k="item1.name"><input type="text" data-k="item1.value">
+        <label class="file">换图<input type="file" id="img1-file" accept="image/*"></label>
+      </div>
+      <label>礼品 2</label>
+      <div class="item">
+        <input type="text" data-k="item2.name"><input type="text" data-k="item2.value">
+        <label class="file">换图<input type="file" id="img2-file" accept="image/*"></label>
+      </div>
+      <label>礼品 3（券）</label>
+      <div class="item" style="grid-template-columns:1fr 86px">
+        <input type="text" data-k="item3.name"><input type="text" data-k="item3.value">
+      </div>
+      <button class="link" id="reset">恢复总部默认内容</button>
+    </details>
+  </section>
 </main>
 
 <div id="sheet" hidden>

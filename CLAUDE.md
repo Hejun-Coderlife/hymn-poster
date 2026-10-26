@@ -9,3 +9,5 @@
 - 活动文案：data/activity.js（总部改这里）。
 - 字体（照原图核对过）：标题/数字=思源宋体 Noto Serif SC Black，小字=思源黑体 Noto Sans SC Regular，GB2312一级子集，OFL；原文件和 venv 在 fonts-src/（已 gitignore），改字体后跑 python3 tools/build_assets.py。
 - 链接带 ?store=横溪店 可直接选好门店。
+- 背景 source/bg.png、面膜图 source/mask.png 是用户给的；logo 用 flip-clock 的白色原件 logo-hymn.png（保持白色）。
+- 同一个 index.html 两套布局：>860px 电脑版(左预览右表单)，≤860px 手机版(选店→预览→信息，下载按钮固定底部，点预览看大图可长按保存)。

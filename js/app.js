@@ -143,6 +143,15 @@
     $('#dl-png').addEventListener('click', () => exportFile('png'));
     $('#dl-pdf').addEventListener('click', () => exportFile('pdf'));
     $('#sheet-close').addEventListener('click', () => { $('#sheet').hidden = true; });
+    // 手机上点预览看大图（也能长按保存）
+    preview.addEventListener('click', () => {
+      if (!matchMedia('(max-width: 860px)').matches || !assets) return;
+      const c = document.createElement('canvas');
+      Poster.draw(c, posterData(), assets, EXPORT_SCALE);
+      $('#sheet-img').src = c.toDataURL('image/jpeg', 0.92);
+      $('#sheet-tip').textContent = '长按图片可保存';
+      $('#sheet').hidden = false;
+    });
   }
 
   function fileToDataURL(f) {
