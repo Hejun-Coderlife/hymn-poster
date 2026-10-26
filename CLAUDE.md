@@ -7,5 +7,5 @@
 - 门店数据 data/stores.js 由 tools/build_data.js 从 hymn-site 官网列表 + 抖音看板 43 店档案生成；电话用官网的对外电话。三横店官网没地址。
 - 二维码：图片放 qr/，文件名=店名（如 横溪店.png），双击「打包二维码.command」。
 - 活动文案：data/activity.js（总部改这里）。
-- 字体：Noto Serif SC Black 子集(GB2312一级+) + Bodoni Moda 800，均 OFL；原文件和 venv 在 fonts-src/（已 gitignore），改字体后跑 python3 tools/build_assets.py。
+- 字体（照原图核对过）：标题/数字=思源宋体 Noto Serif SC Black，小字=思源黑体 Noto Sans SC Regular，GB2312一级子集，OFL；原文件和 venv 在 fonts-src/（已 gitignore），改字体后跑 python3 tools/build_assets.py。
 - 链接带 ?store=横溪店 可直接选好门店。

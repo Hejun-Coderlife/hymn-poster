@@ -28,7 +28,7 @@
   async function loadFonts() {
     const faces = [
       new FontFace('HymnSerif', `url(${ASSETS.serif})`, { weight: '900' }),
-      new FontFace('HymnBodoni', `url(${ASSETS.bodoni})`, { weight: '800' }),
+      new FontFace('HymnSans', `url(${ASSETS.sans})`, { weight: '400' }),
     ];
     await Promise.all(faces.map(f => f.load().then(() => document.fonts.add(f)).catch(() => {})));
   }
@@ -226,8 +226,8 @@
     buildStoreSelect();
     bind();
     await loadFonts();
-    const [logo, item1, item2] = await Promise.all([ASSETS.logo, ASSETS.item1, ASSETS.item2].map(loadImage));
-    assets = { logo, item1, item2 };
+    const [logo, item1, item2, bg] = await Promise.all([ASSETS.logo, ASSETS.item1, ASSETS.item2, ASSETS.bg].map(loadImage));
+    assets = { logo, item1, item2, bg };
     state.img1 = item1;
     state.img2 = item2;
     // 链接里带 ?store=横溪店 就直接选好这家（可以把专属链接发给店长）

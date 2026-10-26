@@ -4,8 +4,9 @@ import base64, json, os
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 FILES = {
     'serif': ('assets/serif-sc.woff2', 'font/woff2'),
-    'bodoni': ('assets/bodoni.woff2', 'font/woff2'),
-    'logo': ('assets/logo-mask.png', 'image/png'),
+    'sans': ('assets/sans-sc.woff2', 'font/woff2'),
+    'logo': ('assets/logo.png', 'image/png'),
+    'bg': ('assets/bg.jpg', 'image/jpeg'),
     'item1': ('assets/item1.jpg', 'image/jpeg'),
     'item2': ('assets/item2.jpg', 'image/jpeg'),
 }
