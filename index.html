@@ -31,6 +31,8 @@
   .info { grid-area: info; }
   .act { grid-area: act; }
   .date { grid-area: date; }
+  .ehead { grid-area: head; }
+  .actions { grid-area: dl; }
   .sec { border-top: 1px solid var(--line-2); padding-top: 14px; }
   .sec h3 { font-size: 12px; font-weight: 400; color: var(--t3); letter-spacing: var(--track); margin-bottom: 4px; }
 
@@ -147,28 +149,29 @@
   /* ---------- 电脑版：左边大预览，右边表单 ---------- */
   @media (min-width: 861px) {
     .top { padding: 20px 40px; }
-    .pagehead { padding: 26px 40px 4px; max-width: 1320px; margin: 0 auto; }
-    .gallery { padding: 24px 40px 56px; max-width: 1320px; margin: 0 auto; }
+    .pagehead { padding: 26px 40px 4px; max-width: 1600px; margin: 0 auto; }
+    .gallery { padding: 24px 40px 56px; max-width: 1600px; margin: 0 auto; }
+    /* 编辑页：左边预览按屏幕高度撑满，标题和下载按钮都放右栏顶上 */
+    body.view-editor .top { padding: 14px 40px; }
     main {
       grid-template-columns: minmax(0, 1fr) 360px;
-      grid-template-rows: auto auto auto 1fr;
-      grid-template-areas: "stage pick" "stage date" "stage info" "stage act";
-      gap: 20px 48px; padding: 18px 40px 56px; max-width: 1320px; margin: 0 auto; align-items: start;
+      grid-template-rows: auto auto auto auto auto 1fr;
+      grid-template-areas: "stage head" "stage dl" "stage pick" "stage date" "stage info" "stage act";
+      gap: 20px 48px; padding: 20px 40px 40px; margin: 0 auto; align-items: start;
     }
-    .pick { border-top: 0; padding-top: 0; }
+    main .pagehead { padding: 0; margin: 0; }
+    main .pagehead h2 { font-size: 19px; }
     .stage { position: sticky; top: 20px; }
-    :root { --pv: min(780px, calc(100vh - 260px)); }
-    #preview { max-width: var(--pv); margin: 0 auto; border: 1px solid var(--line-2); }
+    /* 屏幕高度减去顶栏和上下留白 */
+    :root { --pv: calc(100vh - 100px); }
+    #preview { width: auto; height: auto; max-width: 100%; max-height: var(--pv); margin: 0 auto; border: 1px solid var(--line-2); }
     .view { display: flex; justify-content: center; gap: 18px; align-items: flex-start; min-width: 0; }
-    body.multi #preview { display: block; flex: 0 1 var(--pv); min-width: 0; width: auto; margin: 0; }
-    body.spread #preview { max-width: calc(var(--pv) * 1.45); }
-    body.spread.multi #preview { flex-basis: calc(var(--pv) * 1.45); }
+    body.multi #preview { display: block; flex: 0 1 auto; min-width: 0; margin: 0; }
     body.multi .grid { flex: none; width: 116px; max-height: var(--pv); overflow-y: auto; gap: 14px; padding: 4px 6px 4px 4px; }
     body.multi .card figcaption { font-size: 11px; margin-top: 4px; }
     body.multi .card canvas { outline-width: 1px; }
     body.multi .card.on canvas { outline: 2px solid var(--ink); outline-offset: 2px; }
-    .actions { justify-content: center; margin-top: 18px; }
-    .actions .btn { min-width: 150px; }
+    .actions .btn { flex: 1; }
     .hint-mobile { display: none; }
   }
 
@@ -182,10 +185,11 @@
     .tpl-list { grid-template-columns: minmax(0, 1fr); gap: 28px; }
     main {
       grid-template-columns: minmax(0, 1fr);
-      grid-template-areas: "pick" "date" "stage" "info" "act";
+      grid-template-areas: "head" "pick" "date" "stage" "info" "act" "dl";
       gap: 16px; padding: 12px 16px calc(84px + env(safe-area-inset-bottom));
     }
     .pick { border-top: 0; padding-top: 0; }
+    main .pagehead { padding: 0; }
     .hint-mobile { text-align: center; color: var(--t3); font-size: 12px; margin-top: 6px; }
     input[type=text], input[type=date] { font-size: 16px; } /* 防 iPhone 输入时自动放大 */
     #store-list { max-height: 55vh; }
@@ -211,11 +215,11 @@
   <div class="loading">海报加载中…</div>
 </section>
 
-<header class="pagehead e-only">
-  <a class="back" href="?">← 全部海报</a>
-  <h2 id="tpl-name">门店海报</h2>
-</header>
 <main class="e-only">
+  <header class="pagehead ehead">
+    <a class="back" href="?">← 全部海报</a>
+    <h2 id="tpl-name">门店海报</h2>
+  </header>
   <section class="stage">
     <div class="view">
       <div class="grid" id="grid"></div>
@@ -223,11 +227,12 @@
     </div>
     <div class="loading">字体加载中…</div>
     <div class="hint-mobile"><span class="one">点海报可看大图</span><span class="many">点哪张，信息就在哪张下面；再点一次看大图</span></div>
-    <div class="actions">
-      <button class="btn solid" id="dl-png">下载图片</button>
-      <button class="btn" id="dl-pdf">下载 PDF</button>
-    </div>
   </section>
+
+  <div class="actions">
+    <button class="btn solid" id="dl-png">下载图片</button>
+    <button class="btn" id="dl-pdf">下载 PDF</button>
+  </div>
 
   <section class="sec pick">
     <h3>选择门店 · 可多选</h3>
@@ -302,14 +307,14 @@
   </div>
 </div>
 
-<script src="assets/assets.js?v=202610261201"></script>
-<script src="data/stores.js?v=202610261201"></script>
-<script src="data/pinyin.js?v=202610261201"></script>
-<script src="data/activity.js?v=202610261201"></script>
-<script src="data/qr.js?v=202610261201"></script>
-<script src="js/poster2.js?v=202610261201"></script>
-<script src="js/poster.js?v=202610261201"></script>
-<script src="data/templates.js?v=202610261201"></script>
-<script src="js/app.js?v=202610261201"></script>
+<script src="assets/assets.js?v=202610270914"></script>
+<script src="data/stores.js?v=202610270914"></script>
+<script src="data/pinyin.js?v=202610270914"></script>
+<script src="data/activity.js?v=202610270914"></script>
+<script src="data/qr.js?v=202610270914"></script>
+<script src="js/poster2.js?v=202610270914"></script>
+<script src="js/poster.js?v=202610270914"></script>
+<script src="data/templates.js?v=202610270914"></script>
+<script src="js/app.js?v=202610270914"></script>
 </body>
 </html>

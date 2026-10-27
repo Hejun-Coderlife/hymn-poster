@@ -51,7 +51,7 @@
     const asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
     ctx.translate(cx, cy);
     ctx.transform(1, 0, -0.16, 1, 0, 0); // 往右斜
-    const x = -w / 2 + m.actualBoundingBoxLeft, y = 372 - cy - desc; // 字底对齐在第二行上方，店名长字变小时也贴着第二行
+    const x = -w / 2 + m.actualBoundingBoxLeft, y = 325 - cy - desc; // 字底在第二行上方留出行距，店名长字变小时也保持这个间距
     const k = size / 290;
     // 白描边 + 浅浅的投影（不用红光晕，红光晕会把整行压暗）
     softShadow(ctx, 'rgba(190,40,70,.28)', 24 * k, 0, 8 * k);
